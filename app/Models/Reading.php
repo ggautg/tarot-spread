@@ -7,7 +7,10 @@ use Illuminate\Support\Str;
 
 class Reading extends Model
 {
-    protected $fillable = ['uuid', 'spread_id', 'user_id', 'session_id', 'seed', 'pregunta'];
+    protected $fillable = [
+    'uuid', 'spread_id', 'user_id', 'session_id', 'pregunta',
+    'server_seed', 'server_seed_hash', 'client_seed', 'revealed_at',
+];
 
     protected static function booted()
     {

@@ -18,27 +18,46 @@ class ReadingController extends Controller
         ]);
     }
 
+    /**
+     * Paso 1 — COMMIT: el servidor genera su seed secreto y publica solo
+     * el hash. A partir de acá, el servidor ya no puede cambiar de resultado.
+     */
     public function store(Request $request, Spread $spread)
     {
         $request->validate([
             'pregunta' => 'nullable|string|max:255',
         ]);
 
-        // Seed reproducible: combina timestamp + random + spread, igual filosofía
-        // que el hash SHA-256 de El Corazón de las Cartas.
-        $seed = hash('sha256', Str::uuid() . now()->timestamp . $spread->id);
+        $serverSeed = Str::random(40);
 
         $reading = Reading::create([
-            'spread_id'  => $spread->id,
-            'user_id'    => $request->user()?->id,
-            'session_id' => $request->session()->getId(),
-            'seed'       => $seed,
-            'pregunta'   => $request->pregunta,
+            'spread_id'        => $spread->id,
+            'user_id'          => $request->user()?->id,
+            'session_id'       => $request->session()->getId(),
+            'server_seed'      => $serverSeed, // se guarda ya, pero no se muestra hasta el reveal
+            'server_seed_hash' => hash('sha256', $serverSeed),
+            'client_seed'      => Str::random(16), // aporte de aleatoriedad público desde el inicio
+            'pregunta'         => $request->pregunta,
         ]);
 
-        $draw = $this->computeDraw($seed, $spread);
+        return redirect()->route('readings.show', $reading->uuid);
+    }
 
-        foreach ($spread->positions()->orderBy('orden')->get() as $index => $position) {
+    /**
+     * Paso 2 — REVEAL: abre el sobre. Combina server_seed + client_seed,
+     * calcula la tirada, la persiste, y marca revealed_at para que no se
+     * pueda volver a revelar (y así tampoco recalcular con otro resultado).
+     */
+    public function reveal(Reading $reading)
+    {
+        if ($reading->revealed_at !== null) {
+            return redirect()->route('readings.show', $reading->uuid);
+        }
+
+        $finalSeed = hash('sha256', $reading->server_seed . $reading->client_seed);
+        $draw = $this->computeDraw($finalSeed, $reading->spread);
+
+        foreach ($reading->spread->positions()->orderBy('orden')->get() as $index => $position) {
             $reading->cards()->create([
                 'spread_position_id' => $position->id,
                 'card_id'            => $draw[$index]['card_id'],
@@ -46,24 +65,22 @@ class ReadingController extends Controller
             ]);
         }
 
+        $reading->update(['revealed_at' => now()]);
+
         return redirect()->route('readings.show', $reading->uuid);
     }
 
     /**
-     * Calcula, de forma puramente determinística a partir del seed, qué cartas
-     * salen y en qué orientación. No toca la base — es la misma función que usa
-     * store() para persistir y verify() para comprobar que nada fue manipulado.
+     * Calcula, de forma puramente determinística a partir del seed final,
+     * qué cartas salen y en qué orientación. No toca la base.
      *
-     * @return array<int, array{card_id: int, invertida: bool}> indexado igual
-     *         que las posiciones del spread ordenadas por 'orden'.
+     * @return array<int, array{card_id: int, invertida: bool}>
      */
     private function computeDraw(string $seed, Spread $spread): array
     {
         $numericSeed = hexdec(substr($seed, 0, 8));
         mt_srand($numericSeed);
 
-        // orderBy('id') explícito: garantiza que el barajado parta siempre
-        // de la misma secuencia base, sin depender del orden físico en disco.
         $allCardIds = Card::orderBy('id')->pluck('id')->toArray();
         $positionsCount = $spread->positions()->count();
 
@@ -82,7 +99,7 @@ class ReadingController extends Controller
             ];
         }
 
-        mt_srand(); // reseteamos la semilla para no afectar otros random del request
+        mt_srand();
 
         return $result;
     }
@@ -93,18 +110,22 @@ class ReadingController extends Controller
 
         return Inertia::render('Readings/Show', [
             'reading'  => $reading,
-            'verified' => $this->verify($reading),
+            'verified' => $reading->revealed_at ? $this->verify($reading) : null,
         ]);
     }
 
     /**
-     * Recalcula la tirada desde el seed guardado y compara, carta por carta
-     * y orientación por orientación, contra lo que quedó persistido.
-     * Si algo no coincide, alguien tocó la base a mano después de la tirada.
+     * Verificación en dos partes:
+     * 1) el server_seed revelado realmente corresponde al hash publicado al comprometer
+     * 2) la tirada persistida realmente sale de combinar ese server_seed + client_seed
+     * Si cualquiera de las dos falla, algo fue manipulado después del commit.
      */
     private function verify(Reading $reading): bool
     {
-        $draw = $this->computeDraw($reading->seed, $reading->spread);
+        $hashMatches = hash('sha256', $reading->server_seed) === $reading->server_seed_hash;
+
+        $finalSeed = hash('sha256', $reading->server_seed . $reading->client_seed);
+        $draw = $this->computeDraw($finalSeed, $reading->spread);
 
         $storedCards = $reading->cards()
             ->join('spread_positions', 'reading_cards.spread_position_id', '=', 'spread_positions.id')
@@ -123,7 +144,7 @@ class ReadingController extends Controller
             }
         }
 
-        return true;
+        return $hashMatches;
     }
 
     public function history(Request $request)
