@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
   reading: Object,
@@ -10,7 +11,23 @@ const props = defineProps({
   },
 });
 
-const revealed = ref(new Set());
+const notesForm = useForm({
+  notas_personales: props.reading.notas_personales || '',
+});
+
+const notesSaved = ref(false);
+
+function saveNotes() {
+  notesForm.patch(route('readings.notes', props.reading.uuid), {
+    preserveScroll: true,
+    onSuccess: () => {
+      notesSaved.value = true;
+      setTimeout(() => (notesSaved.value = false), 2000);
+    },
+  });
+}
+
+const revealed = ref(new Set(props.reading.cards.map(rc => rc.id)));
 const copied = ref(false);
 
 function copyLink() {
@@ -28,11 +45,6 @@ function toggleReveal(cardId) {
 
 function isRevealed(cardId) {
   return revealed.value.has(cardId);
-}
-
-function revealAll() {
-  props.reading.cards.forEach(rc => revealed.value.add(rc.id));
-  revealed.value = new Set(revealed.value);
 }
 </script>
 
@@ -78,14 +90,6 @@ function revealAll() {
       >
         {{ copied ? '✓ Copiado' : 'Copiar link' }}
       </button>
-
-      <button
-        v-if="reading.revealed_at"
-        @click="revealAll"
-        class="mt-4 ml-3 inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest border border-[#C9A227]/40 rounded px-4 py-2 text-[#C9A227] hover:bg-[#C9A227]/10 transition"
-      >
-        Revelar todas
-      </button>
     </div>
 
     <!-- Pantalla de compromiso: todavía no se tiraron las cartas -->
@@ -121,6 +125,11 @@ function revealAll() {
         @click="toggleReveal(rc.id)"
       >
         <div class="flip-card" :class="{ flipped: isRevealed(rc.id) }">
+          <span
+            class="absolute -top-2 -right-2 z-10 w-5 h-5 rounded-full bg-[#C9A227] text-[#150F26] text-[10px] font-mono font-bold flex items-center justify-center shadow-md"
+          >
+            {{ rc.position.orden }}
+          </span>
           <div class="flip-inner">
             <!-- Dorso -->
             <div class="flip-face flip-back">
@@ -166,11 +175,36 @@ function revealAll() {
         </p>
       </div>
     </div>
+
+    <!-- Notas personales -->
+    <div v-if="reading.revealed_at" class="max-w-2xl mx-auto mt-12 border-t border-[#C9A227]/20 pt-8">
+      <p class="text-xs uppercase tracking-widest text-[#C9A227] mb-3">
+        Tus notas
+      </p>
+      <textarea
+        v-model="notesForm.notas_personales"
+        rows="4"
+        placeholder="¿Cómo te sentiste con esta lectura? ¿Se cumplió algo, te dolió, te hizo pensar?"
+        class="w-full bg-[#4A3B6B]/20 border border-[#C9A227]/25 rounded px-4 py-3 text-[#EDE3D0] placeholder-[#EDE3D0]/30 focus:outline-none focus:border-[#C9A227] transition resize-none"
+        style="font-family: 'Cormorant Garamond', serif; font-size: 1.05rem;"
+      />
+      <div class="flex items-center gap-3 mt-3">
+        <button
+          @click="saveNotes"
+          :disabled="notesForm.processing"
+          class="bg-[#C9A227] text-[#150F26] font-semibold text-sm py-2 px-5 rounded hover:bg-[#dbb53a] transition disabled:opacity-50"
+        >
+          Guardar notas
+        </button>
+        <span v-if="notesSaved" class="text-xs font-mono text-[#C9A227]">✓ Guardado</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .flip-card {
+  position: relative;
   width: 64px;
   height: 96px;
   perspective: 800px;

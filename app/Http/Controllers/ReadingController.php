@@ -161,4 +161,35 @@ class ReadingController extends Controller
             'readings' => $query->get(),
         ]);
     }
+
+    public function updateNotes(Request $request, Reading $reading)
+    {
+        $isOwner = $request->user()
+            ? $reading->user_id === $request->user()->id
+            : ($reading->user_id === null && $reading->session_id === $request->session()->getId());
+
+        abort_unless($isOwner, 403);
+
+        $request->validate([
+            'notas_personales' => 'nullable|string|max:2000',
+        ]);
+
+        $reading->update(['notas_personales' => $request->notas_personales]);
+
+        return back();
+    }
+
+    public function destroy(Request $request, Reading $reading)
+    {
+        // Solo el dueño puede borrar: mismo usuario logueado, o misma sesión si es anónima
+        $isOwner = $request->user()
+            ? $reading->user_id === $request->user()->id
+            : ($reading->user_id === null && $reading->session_id === $request->session()->getId());
+
+        abort_unless($isOwner, 403);
+
+        $reading->delete(); // cascadeOnDelete en reading_cards se encarga del resto
+
+        return back()->with('success', 'Lectura eliminada.');
+    }
 }
