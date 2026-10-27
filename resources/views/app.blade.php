@@ -4,14 +4,34 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'El Oráculo') }}</title>
+
+        <link rel="icon" href="/favicon.ico" sizes="any">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <meta name="theme-color" content="#150F26">
+        <meta name="color-scheme" content="dark light">
+
+        <!-- Corriente visual: se aplica antes del primer pintado para evitar el flash -->
+        <script>
+            (function () {
+                var theme = null;
+                try { theme = window.localStorage.getItem('oraculo.theme'); } catch (e) {}
+                @auth
+                    theme = @json(auth()->user()->theme) || theme;
+                @endauth
+                if (theme) { document.documentElement.dataset.theme = theme; }
+            })();
+        </script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Eczar:wght@400;600&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Marcellus&family=MedievalSharp&family=Spectral:ital,wght@0,400;0,600;1,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @routes

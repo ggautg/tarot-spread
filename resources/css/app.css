@@ -1,3 +1,340 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ |--------------------------------------------------------------------------
+ | Corrientes visuales (temas)
+ |--------------------------------------------------------------------------
+ | Cada tema expone las mismas variables. El resto de la interfaz solo usa
+ | estas variables a través de las clases .theme-* de abajo, así que agregar
+ | una corriente nueva no requiere tocar ninguna página.
+ */
+
+:root,
+[data-theme='fortune'] {
+    --t-bg: #150f26;
+    --t-bg-alt: #1d1533;
+    --t-surface: #2a1e45;
+    --t-ink: #ede3d0;
+    --t-accent: #c9a227;
+    --t-accent-2: #b08bc4;
+    --t-danger: #a2445a;
+    --t-card-back: #4a3b6b;
+    --t-radius: 0.5rem;
+    --t-font-display: 'Cormorant Garamond', Georgia, serif;
+    --t-font-body: 'Cormorant Garamond', Georgia, serif;
+    --t-font-label: 'Cinzel', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 18% 0%, rgba(176, 139, 196, 0.22), transparent 55%),
+        radial-gradient(ellipse at 85% 12%, rgba(201, 162, 39, 0.12), transparent 45%),
+        radial-gradient(ellipse at 50% 105%, rgba(90, 60, 140, 0.35), transparent 62%);
+}
+
+[data-theme='merlin'] {
+    --t-bg: #0a1712;
+    --t-bg-alt: #0f241b;
+    --t-surface: #163024;
+    --t-ink: #eae6d4;
+    --t-accent: #a9c69b;
+    --t-accent-2: #cbd3d8;
+    --t-danger: #a34c4c;
+    --t-card-back: #1f4231;
+    --t-radius: 0.375rem;
+    --t-font-display: 'Cinzel', 'Times New Roman', serif;
+    --t-font-body: 'Cormorant Garamond', Georgia, serif;
+    --t-font-label: 'IM Fell English SC', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 15% 8%, rgba(120, 170, 120, 0.2), transparent 55%),
+        radial-gradient(ellipse at 85% 28%, rgba(203, 211, 216, 0.1), transparent 45%),
+        radial-gradient(ellipse at 50% 110%, rgba(18, 60, 40, 0.55), transparent 62%);
+}
+
+[data-theme='crowley'] {
+    --t-bg: #0b0608;
+    --t-bg-alt: #140a0d;
+    --t-surface: #1f1015;
+    --t-ink: #f0e4d6;
+    --t-accent: #d64b3e;
+    --t-accent-2: #c9a227;
+    --t-danger: #d64b3e;
+    --t-card-back: #2b1216;
+    --t-radius: 0.25rem;
+    --t-font-display: 'UnifrakturMaguntia', 'Cinzel', serif;
+    --t-font-body: 'IM Fell English', Georgia, serif;
+    --t-font-label: 'IM Fell English SC', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 50% -10%, rgba(196, 52, 43, 0.3), transparent 58%),
+        radial-gradient(ellipse at 82% 92%, rgba(201, 162, 39, 0.1), transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(20, 8, 10, 0.6), transparent 70%);
+}
+
+[data-theme='dee'] {
+    --t-bg: #060b14;
+    --t-bg-alt: #0b1320;
+    --t-surface: #101c2c;
+    --t-ink: #d9e6f2;
+    --t-accent: #6fb3d9;
+    --t-accent-2: #c0a062;
+    --t-danger: #a24a4a;
+    --t-card-back: #16283c;
+    --t-radius: 0.375rem;
+    --t-font-display: 'Marcellus', 'Times New Roman', serif;
+    --t-font-body: 'Spectral', Georgia, serif;
+    --t-font-label: 'Marcellus', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 24% 12%, rgba(111, 179, 217, 0.28), transparent 55%),
+        radial-gradient(ellipse at 78% 22%, rgba(192, 160, 98, 0.12), transparent 42%),
+        radial-gradient(ellipse at 50% 108%, rgba(8, 24, 48, 0.7), transparent 65%);
+}
+
+[data-theme='levi'] {
+    --t-bg: #efe3c8;
+    --t-bg-alt: #e8d9b9;
+    --t-surface: #e0cfa9;
+    --t-ink: #2a1b10;
+    --t-accent: #8b1e1e;
+    --t-accent-2: #6b4e2e;
+    --t-danger: #8b1e1e;
+    --t-card-back: #6b4e2e;
+    --t-radius: 0.125rem;
+    --t-font-display: 'Marcellus', 'Times New Roman', serif;
+    --t-font-body: 'Cormorant Garamond', Georgia, serif;
+    --t-font-label: 'IM Fell English SC', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 50% -10%, rgba(139, 30, 30, 0.12), transparent 60%),
+        radial-gradient(ellipse at 82% 100%, rgba(107, 78, 46, 0.22), transparent 58%),
+        repeating-linear-gradient(0deg, rgba(107, 78, 46, 0.045) 0 1px, transparent 1px 3px);
+}
+
+[data-theme='blavatsky'] {
+    --t-bg: #1a1030;
+    --t-bg-alt: #221540;
+    --t-surface: #2a1b47;
+    --t-ink: #efe4fa;
+    --t-accent: #c9a227;
+    --t-accent-2: #7ec8c8;
+    --t-danger: #a2445a;
+    --t-card-back: #3a2560;
+    --t-radius: 0.5rem;
+    --t-font-display: 'Eczar', Georgia, serif;
+    --t-font-body: 'Spectral', Georgia, serif;
+    --t-font-label: 'IM Fell English SC', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 20% 10%, rgba(126, 200, 200, 0.18), transparent 50%),
+        radial-gradient(ellipse at 85% 18%, rgba(201, 162, 39, 0.18), transparent 45%),
+        radial-gradient(ellipse at 50% 105%, rgba(80, 40, 140, 0.5), transparent 62%);
+}
+
+[data-theme='agrippa'] {
+    --t-bg: #0e0b08;
+    --t-bg-alt: #15100b;
+    --t-surface: #1f1810;
+    --t-ink: #e9dcc0;
+    --t-accent: #d4af37;
+    --t-accent-2: #9a7b4f;
+    --t-danger: #a24a4a;
+    --t-card-back: #2b2114;
+    --t-radius: 0.125rem;
+    --t-font-display: 'MedievalSharp', 'Cinzel', serif;
+    --t-font-body: 'IM Fell English', Georgia, serif;
+    --t-font-label: 'IM Fell English SC', 'Times New Roman', serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 72% 0%, rgba(212, 175, 55, 0.2), transparent 55%),
+        radial-gradient(ellipse at 18% 100%, rgba(154, 123, 79, 0.16), transparent 52%),
+        repeating-linear-gradient(90deg, rgba(212, 175, 55, 0.035) 0 1px, transparent 1px 4px);
+}
+
+[data-theme='nostradamus'] {
+    --t-bg: #0a1020;
+    --t-bg-alt: #0e162b;
+    --t-surface: #131c33;
+    --t-ink: #e7e3d2;
+    --t-accent: #e0a458;
+    --t-accent-2: #8fa6c9;
+    --t-danger: #b05a4a;
+    --t-card-back: #1c2942;
+    --t-radius: 0.25rem;
+    --t-font-display: 'Spectral', Georgia, serif;
+    --t-font-body: 'Cormorant Garamond', Georgia, serif;
+    --t-font-label: 'Spectral', Georgia, serif;
+    --t-bg-image:
+        radial-gradient(ellipse at 30% 0%, rgba(143, 166, 201, 0.22), transparent 55%),
+        radial-gradient(ellipse at 80% 82%, rgba(224, 164, 88, 0.14), transparent 45%),
+        radial-gradient(ellipse at 50% 110%, rgba(8, 16, 36, 0.75), transparent 62%);
+}
+
+@layer base {
+    html {
+        background-color: var(--t-bg);
+    }
+
+    body {
+        background-color: var(--t-bg);
+        color: var(--t-ink);
+        transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    ::selection {
+        background-color: var(--t-accent);
+        color: var(--t-bg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        body,
+        .theme-page {
+            transition: none;
+        }
+    }
+}
+
+@layer components {
+    .theme-page {
+        background-color: var(--t-bg);
+        background-image: var(--t-bg-image);
+        color: var(--t-ink);
+        font-family: var(--t-font-body);
+        transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    .theme-display {
+        font-family: var(--t-font-display);
+        letter-spacing: 0.01em;
+    }
+
+    .theme-body {
+        font-family: var(--t-font-body);
+    }
+
+    .theme-label {
+        font-family: var(--t-font-label);
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+    }
+
+    .theme-accent {
+        color: var(--t-accent);
+    }
+
+    .theme-accent-2 {
+        color: var(--t-accent-2);
+    }
+
+    .theme-muted {
+        color: color-mix(in srgb, var(--t-ink) 72%, transparent);
+    }
+
+    .theme-faint {
+        color: color-mix(in srgb, var(--t-ink) 60%, transparent);
+    }
+
+    .theme-rule {
+        border-color: color-mix(in srgb, var(--t-accent) 28%, transparent);
+    }
+
+    .theme-panel {
+        background-color: color-mix(in srgb, var(--t-surface) 48%, transparent);
+        border: 1px solid color-mix(in srgb, var(--t-accent) 22%, transparent);
+        border-radius: var(--t-radius);
+    }
+
+    .theme-panel-solid {
+        background-color: var(--t-surface);
+        border: 1px solid color-mix(in srgb, var(--t-accent) 30%, transparent);
+        border-radius: var(--t-radius);
+    }
+
+    .theme-link {
+        color: var(--t-accent);
+        transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-link:hover {
+        color: color-mix(in srgb, var(--t-accent) 70%, var(--t-ink));
+    }
+
+    .theme-btn {
+        background-color: var(--t-accent);
+        color: var(--t-bg);
+        font-family: var(--t-font-label);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .theme-btn:hover {
+        background-color: color-mix(in srgb, var(--t-accent) 78%, var(--t-ink));
+    }
+
+    .theme-btn:disabled {
+        opacity: 0.5;
+    }
+
+    .theme-btn-ghost {
+        border: 1px solid color-mix(in srgb, var(--t-accent) 45%, transparent);
+        color: var(--t-accent);
+        font-family: var(--t-font-label);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-btn-ghost:hover {
+        background-color: color-mix(in srgb, var(--t-accent) 12%, transparent);
+        border-color: var(--t-accent);
+    }
+
+    .theme-input {
+        background-color: color-mix(in srgb, var(--t-surface) 55%, transparent);
+        border: 1px solid color-mix(in srgb, var(--t-accent) 28%, transparent);
+        border-radius: var(--t-radius);
+        color: var(--t-ink);
+        font-family: var(--t-font-body);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .theme-input::placeholder {
+        color: color-mix(in srgb, var(--t-ink) 45%, transparent);
+    }
+
+    .theme-input:focus {
+        outline: none;
+        border-color: var(--t-accent);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--t-accent) 45%, transparent);
+    }
+
+    .theme-danger-text {
+        color: var(--t-danger);
+    }
+
+    .theme-danger-btn {
+        border: 1px solid color-mix(in srgb, var(--t-danger) 45%, transparent);
+        color: var(--t-danger);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-danger-btn:hover {
+        background-color: color-mix(in srgb, var(--t-danger) 14%, transparent);
+        border-color: var(--t-danger);
+    }
+
+    /* Tarjeta que se pinta con su propio tema dentro del selector */
+    .theme-preview {
+        background-color: var(--t-bg);
+        background-image: var(--t-bg-image);
+        color: var(--t-ink);
+        font-family: var(--t-font-body);
+    }
+
+    .theme-swatch {
+        background-color: var(--t-accent);
+    }
+
+    .theme-swatch-2 {
+        background-color: var(--t-accent-2);
+    }
+
+    .theme-swatch-surface {
+        background-color: var(--t-surface);
+    }
+}

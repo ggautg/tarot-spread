@@ -1,5 +1,6 @@
 <script setup>
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import OracleLayout from '@/Layouts/OracleLayout.vue';
 
 const props = defineProps({
   spread: Object,
@@ -17,46 +18,52 @@ const submit = () => {
 <template>
   <Head :title="spread.nombre" />
 
-  <div class="min-h-screen relative bg-[#150F26] text-[#EDE3D0] flex items-center justify-center px-6">
-    <Link
-      :href="route('home')"
-      class="absolute top-6 left-6 text-sm font-mono uppercase tracking-widest text-[#C9A227] border border-[#C9A227]/40 rounded px-4 py-2 hover:bg-[#C9A227]/10 transition"
-    >
-      ← Inicio
-    </Link>
+  <OracleLayout>
+    <div class="flex min-h-screen items-center justify-center px-6 py-16">
+      <Link
+        :href="route('home')"
+        class="theme-btn-ghost absolute left-6 top-6 rounded px-4 py-2 text-xs"
+      >
+        ← Inicio
+      </Link>
 
-    <div class="max-w-md w-full">
-      <p class="font-mono text-xs tracking-[0.3em] text-[#C9A227] uppercase mb-3">
-        {{ spread.cantidad_cartas }} cartas
-      </p>
-      <h1 class="text-4xl mb-4" style="font-family: 'Cinzel', serif;">
-        {{ spread.nombre }}
-      </h1>
-      <p class="text-[#EDE3D0]/70 mb-8 leading-relaxed" style="font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;">
-        {{ spread.descripcion }}
-      </p>
+      <div class="w-full max-w-md">
+        <p class="theme-label theme-accent mb-3 text-[10px]">
+          {{ spread.cantidad_cartas }} cartas
+        </p>
+        <h1 class="theme-display mb-4 text-4xl">
+          {{ spread.nombre }}
+        </h1>
+        <p class="theme-body theme-muted mb-8 text-lg leading-relaxed">
+          {{ spread.descripcion }}
+        </p>
 
-      <form @submit.prevent="submit" class="space-y-4">
-        <div>
-          <label class="block text-xs uppercase tracking-widest text-[#C9A227]/80 mb-2">
-            Tu pregunta (opcional)
-          </label>
-          <textarea
-            v-model="form.pregunta"
-            rows="3"
-            placeholder="¿Qué querés consultar?"
-            class="w-full bg-[#4A3B6B]/30 border border-[#C9A227]/30 rounded px-4 py-3 text-[#EDE3D0] placeholder-[#EDE3D0]/30 focus:outline-none focus:border-[#C9A227] transition"
-          />
-        </div>
+        <form class="space-y-4" @submit.prevent="submit">
+          <div>
+            <label class="theme-label theme-accent mb-2 block text-[9px]">
+              Tu pregunta (opcional)
+            </label>
+            <textarea
+              v-model="form.pregunta"
+              rows="3"
+              placeholder="¿Qué querés consultar?"
+              class="theme-input w-full px-4 py-3"
+            />
+          </div>
 
-        <button
-          type="submit"
-          :disabled="form.processing"
-          class="w-full bg-[#C9A227] text-[#150F26] font-semibold py-3 rounded hover:bg-[#dbb53a] transition disabled:opacity-50"
-        >
-          Barajar y tirar
-        </button>
-      </form>
+          <button
+            type="submit"
+            :disabled="form.processing"
+            class="theme-btn w-full rounded py-3 text-sm font-semibold"
+          >
+            Barajar y tirar
+          </button>
+        </form>
+
+        <p class="theme-label theme-faint mt-6 text-[9px] leading-relaxed">
+          La tirada queda comprometida con un hash antes de revelarse.
+        </p>
+      </div>
     </div>
-  </div>
+  </OracleLayout>
 </template>

@@ -10,6 +10,9 @@ Route::get('/', function () {
 })->name('home');
 
 use App\Http\Controllers\ReadingController;
+use App\Http\Controllers\ThemeController;
+
+Route::patch('/tema', [ThemeController::class, 'update'])->middleware('auth')->name('theme.update');
 
 Route::get('/tirada/{spread:slug}', [ReadingController::class, 'create'])->name('readings.create');
 Route::post('/tirada/{spread:slug}', [ReadingController::class, 'store'])->name('readings.store');
