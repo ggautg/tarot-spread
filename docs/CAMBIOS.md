@@ -129,6 +129,9 @@ con sus referencias.
 ### Movimiento y accesibilidad
 
 - Revelado automático en cascada (`index * 110 ms`), sin clic por carta.
+- El volteo se dispara en dos casos: al montar una lectura ya abierta y al abrir
+  el sobre sobre la misma página. Inertia actualiza las props sin recrear la
+  carta, así que `TarotCard` observa `revealed` además de reaccionar al montaje.
 - Foco visible en todos los controles.
 - Diálogos con `role="dialog"`, `aria-modal`, cierre con `Escape` y retorno del
   foco.

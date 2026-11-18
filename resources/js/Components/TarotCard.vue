@@ -1,11 +1,13 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import OracleMark from './OracleMark.vue';
 
 /**
  * Carta del tarot con dorso y frente.
  *
- * Al montarse con `revealed = true` se voltea sola; el retardo según `index`
+ * Se voltea sola cuando `revealed` pasa a `true`, tanto al montar la página
+ * (lectura ya abierta) como al abrir el sobre sobre la misma página (Inertia
+ * actualiza las props sin recrear el componente). El retardo según `index`
  * produce la cascada de revelado. La animación es CSS puro y respeta
  * `prefers-reduced-motion` (la duración se anula desde `app.css`).
  *
@@ -37,18 +39,35 @@ const ariaLabel = computed(() => {
     return `${place}: ${cardName.value}${invertida.value ? ', invertida' : ''}`;
 });
 
-onMounted(() => {
-    if (!props.revealed) {
-        return;
-    }
+/** Voltea en el siguiente pintado, cuando el dorso ya es visible. */
+let flipTimer = null;
 
-    // Dos frames: asegura que el navegador pinte el dorso antes de voltear.
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            flipped.value = true;
-        });
-    });
+function scheduleFlip() {
+    clearTimeout(flipTimer);
+    flipTimer = setTimeout(() => {
+        flipped.value = true;
+    }, 40);
+}
+
+onMounted(() => {
+    if (props.revealed) {
+        scheduleFlip();
+    }
 });
+
+onBeforeUnmount(() => clearTimeout(flipTimer));
+
+// Al abrir el sobre, Inertia actualiza `revealed` sin remontar la carta. El
+// dorso ya estaba pintado, así que se voltea de inmediato para que la
+// transición arranque sin esperas.
+watch(
+    () => props.revealed,
+    (value) => {
+        if (value) {
+            flipped.value = true;
+        }
+    },
+);
 </script>
 
 <template>
