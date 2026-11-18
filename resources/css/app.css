@@ -6,9 +6,23 @@
  |--------------------------------------------------------------------------
  | Corrientes visuales (temas)
  |--------------------------------------------------------------------------
- | Cada tema expone las mismas variables. El resto de la interfaz solo usa
- | estas variables a través de las clases .theme-* de abajo, así que agregar
- | una corriente nueva no requiere tocar ninguna página.
+ | Cada tema define exactamente los mismos tokens. Toda la interfaz consume
+ | estas variables a través de las clases .theme-*, de modo que añadir una
+ | corriente nueva solo requiere:
+ |   1. su ficha editorial en resources/js/themes.js, y
+ |   2. su bloque [data-theme="id"] aquí.
+ |
+ | Convención de nombres:
+ |   --t-bg          fondo principal
+ |   --t-bg-alt      fondo secundario
+ |   --t-surface     superficie de paneles
+ |   --t-ink         color de texto principal
+ |   --t-accent      color de marca / acciones
+ |   --t-accent-2    color de apoyo
+ |   --t-danger      errores y acciones destructivas
+ |   --t-card-back   dorso de las cartas
+ |   --t-on-accent   texto legible sobre --t-accent
+ |   --t-on-danger   texto legible sobre --t-danger
  */
 
 :root,
@@ -21,6 +35,8 @@
     --t-accent-2: #b08bc4;
     --t-danger: #a2445a;
     --t-card-back: #4a3b6b;
+    --t-on-accent: #150f26;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.5rem;
     --t-font-display: 'Cormorant Garamond', Georgia, serif;
     --t-font-body: 'Cormorant Garamond', Georgia, serif;
@@ -40,6 +56,8 @@
     --t-accent-2: #cbd3d8;
     --t-danger: #a34c4c;
     --t-card-back: #1f4231;
+    --t-on-accent: #0a1712;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.375rem;
     --t-font-display: 'Cinzel', 'Times New Roman', serif;
     --t-font-body: 'Cormorant Garamond', Georgia, serif;
@@ -59,6 +77,8 @@
     --t-accent-2: #c9a227;
     --t-danger: #d64b3e;
     --t-card-back: #2b1216;
+    --t-on-accent: #0b0608;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.25rem;
     --t-font-display: 'UnifrakturMaguntia', 'Cinzel', serif;
     --t-font-body: 'IM Fell English', Georgia, serif;
@@ -78,6 +98,8 @@
     --t-accent-2: #c0a062;
     --t-danger: #a24a4a;
     --t-card-back: #16283c;
+    --t-on-accent: #060b14;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.375rem;
     --t-font-display: 'Marcellus', 'Times New Roman', serif;
     --t-font-body: 'Spectral', Georgia, serif;
@@ -97,6 +119,8 @@
     --t-accent-2: #6b4e2e;
     --t-danger: #8b1e1e;
     --t-card-back: #6b4e2e;
+    --t-on-accent: #f6ecd8;
+    --t-on-danger: #f6ecd8;
     --t-radius: 0.125rem;
     --t-font-display: 'Marcellus', 'Times New Roman', serif;
     --t-font-body: 'Cormorant Garamond', Georgia, serif;
@@ -116,6 +140,8 @@
     --t-accent-2: #7ec8c8;
     --t-danger: #a2445a;
     --t-card-back: #3a2560;
+    --t-on-accent: #1a1030;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.5rem;
     --t-font-display: 'Eczar', Georgia, serif;
     --t-font-body: 'Spectral', Georgia, serif;
@@ -135,6 +161,8 @@
     --t-accent-2: #9a7b4f;
     --t-danger: #a24a4a;
     --t-card-back: #2b2114;
+    --t-on-accent: #0e0b08;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.125rem;
     --t-font-display: 'MedievalSharp', 'Cinzel', serif;
     --t-font-body: 'IM Fell English', Georgia, serif;
@@ -154,6 +182,8 @@
     --t-accent-2: #8fa6c9;
     --t-danger: #b05a4a;
     --t-card-back: #1c2942;
+    --t-on-accent: #0a1020;
+    --t-on-danger: #fff4ef;
     --t-radius: 0.25rem;
     --t-font-display: 'Spectral', Georgia, serif;
     --t-font-body: 'Cormorant Garamond', Georgia, serif;
@@ -167,34 +197,76 @@
 @layer base {
     html {
         background-color: var(--t-bg);
+        scroll-behavior: smooth;
     }
 
     body {
         background-color: var(--t-bg);
         color: var(--t-ink);
-        transition: background-color 0.5s ease, color 0.5s ease;
+        font-family: var(--t-font-body);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        transition: background-color 0.4s ease, color 0.4s ease;
     }
 
     ::selection {
         background-color: var(--t-accent);
-        color: var(--t-bg);
+        color: var(--t-on-accent);
+    }
+
+    /* Foco visible y coherente en todos los controles. */
+    :focus-visible {
+        outline: 2px solid var(--t-accent);
+        outline-offset: 2px;
+    }
+
+    /* Barra de progreso de Inertia: sigue el acento del tema activo. */
+    #nprogress .bar {
+        background: var(--t-accent) !important;
+    }
+
+    #nprogress .peg {
+        box-shadow: 0 0 10px var(--t-accent), 0 0 5px var(--t-accent) !important;
     }
 
     @media (prefers-reduced-motion: reduce) {
-        body,
-        .theme-page {
-            transition: none;
+        html {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+            transition-delay: 0ms !important;
         }
     }
 }
 
 @layer components {
     .theme-page {
+        position: relative;
+        min-height: 100vh;
         background-color: var(--t-bg);
         background-image: var(--t-bg-image);
+        background-attachment: fixed;
         color: var(--t-ink);
         font-family: var(--t-font-body);
-        transition: background-color 0.5s ease, color 0.5s ease;
+        animation: theme-page-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes theme-page-in {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .theme-display {
@@ -208,7 +280,7 @@
 
     .theme-label {
         font-family: var(--t-font-label);
-        letter-spacing: 0.26em;
+        letter-spacing: 0.24em;
         text-transform: uppercase;
     }
 
@@ -221,7 +293,7 @@
     }
 
     .theme-muted {
-        color: color-mix(in srgb, var(--t-ink) 72%, transparent);
+        color: color-mix(in srgb, var(--t-ink) 74%, transparent);
     }
 
     .theme-faint {
@@ -236,6 +308,10 @@
         background-color: color-mix(in srgb, var(--t-surface) 48%, transparent);
         border: 1px solid color-mix(in srgb, var(--t-accent) 22%, transparent);
         border-radius: var(--t-radius);
+        transition:
+            border-color 0.25s ease,
+            background-color 0.25s ease,
+            transform 0.25s ease;
     }
 
     .theme-panel-solid {
@@ -244,39 +320,81 @@
         border-radius: var(--t-radius);
     }
 
+    .theme-interactive:hover {
+        border-color: color-mix(in srgb, var(--t-accent) 60%, transparent);
+        background-color: color-mix(in srgb, var(--t-surface) 66%, transparent);
+        transform: translateY(-2px);
+    }
+
     .theme-link {
         color: var(--t-accent);
-        transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        text-underline-offset: 0.2em;
+        transition: color 0.2s ease, opacity 0.2s ease;
     }
 
     .theme-link:hover {
         color: color-mix(in srgb, var(--t-accent) 70%, var(--t-ink));
+        text-decoration: underline;
     }
 
     .theme-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.75rem;
+        padding: 0.65rem 1.35rem;
+        border: 1px solid transparent;
+        border-radius: var(--t-radius);
         background-color: var(--t-accent);
-        color: var(--t-bg);
+        color: var(--t-on-accent);
         font-family: var(--t-font-label);
+        font-size: 0.72rem;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        transition: background-color 0.2s ease, opacity 0.2s ease;
+        cursor: pointer;
+        transition:
+            background-color 0.2s ease,
+            opacity 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
     }
 
     .theme-btn:hover {
-        background-color: color-mix(in srgb, var(--t-accent) 78%, var(--t-ink));
+        background-color: color-mix(in srgb, var(--t-accent) 80%, var(--t-ink));
     }
 
-    .theme-btn:disabled {
-        opacity: 0.5;
+    .theme-btn:active {
+        transform: translateY(1px);
+    }
+
+    .theme-btn:disabled,
+    .theme-btn[aria-disabled='true'] {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
     }
 
     .theme-btn-ghost {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.75rem;
+        padding: 0.6rem 1.25rem;
         border: 1px solid color-mix(in srgb, var(--t-accent) 45%, transparent);
+        border-radius: var(--t-radius);
+        background-color: transparent;
         color: var(--t-accent);
         font-family: var(--t-font-label);
+        font-size: 0.72rem;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        transition: background-color 0.2s ease, border-color 0.2s ease;
+        cursor: pointer;
+        transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            opacity 0.2s ease;
     }
 
     .theme-btn-ghost:hover {
@@ -284,13 +402,43 @@
         border-color: var(--t-accent);
     }
 
+    .theme-btn-ghost:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .theme-btn-quiet {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--t-ink);
+        font-family: var(--t-font-label);
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.75;
+        cursor: pointer;
+        transition: opacity 0.2s ease, color 0.2s ease;
+    }
+
+    .theme-btn-quiet:hover {
+        opacity: 1;
+        color: var(--t-accent);
+    }
+
     .theme-input {
+        display: block;
+        width: 100%;
+        min-height: 2.75rem;
+        padding: 0.7rem 0.95rem;
         background-color: color-mix(in srgb, var(--t-surface) 55%, transparent);
         border: 1px solid color-mix(in srgb, var(--t-accent) 28%, transparent);
         border-radius: var(--t-radius);
         color: var(--t-ink);
         font-family: var(--t-font-body);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        font-size: 1rem; /* 16px evita el zoom automático en móviles */
+        line-height: 1.5;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
 
     .theme-input::placeholder {
@@ -300,7 +448,12 @@
     .theme-input:focus {
         outline: none;
         border-color: var(--t-accent);
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--t-accent) 45%, transparent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-accent) 22%, transparent);
+    }
+
+    .theme-input:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     .theme-danger-text {
@@ -308,9 +461,22 @@
     }
 
     .theme-danger-btn {
-        border: 1px solid color-mix(in srgb, var(--t-danger) 45%, transparent);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.75rem;
+        padding: 0.6rem 1.25rem;
+        border: 1px solid color-mix(in srgb, var(--t-danger) 50%, transparent);
+        border-radius: var(--t-radius);
+        background-color: transparent;
         color: var(--t-danger);
-        transition: background-color 0.2s ease, border-color 0.2s ease;
+        font-family: var(--t-font-label);
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     }
 
     .theme-danger-btn:hover {
@@ -318,7 +484,75 @@
         border-color: var(--t-danger);
     }
 
-    /* Tarjeta que se pinta con su propio tema dentro del selector */
+    .theme-danger-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .theme-danger-solid {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.75rem;
+        padding: 0.6rem 1.25rem;
+        border: 1px solid transparent;
+        border-radius: var(--t-radius);
+        background-color: var(--t-danger);
+        color: var(--t-on-danger);
+        font-family: var(--t-font-label);
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .theme-danger-solid:hover {
+        opacity: 0.88;
+    }
+
+    .theme-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.6rem;
+        border: 1px solid color-mix(in srgb, var(--t-accent) 35%, transparent);
+        border-radius: 999px;
+        color: var(--t-accent);
+        font-family: var(--t-font-label);
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .theme-chip-danger {
+        border-color: color-mix(in srgb, var(--t-danger) 45%, transparent);
+        color: var(--t-danger);
+    }
+
+    .theme-overlay {
+        background-color: color-mix(in srgb, var(--t-bg) 68%, black);
+        backdrop-filter: blur(4px);
+    }
+
+    .theme-alert {
+        padding: 0.85rem 1rem;
+        border: 1px solid color-mix(in srgb, var(--t-accent) 35%, transparent);
+        border-radius: var(--t-radius);
+        background-color: color-mix(in srgb, var(--t-accent) 10%, transparent);
+        color: var(--t-ink);
+        font-size: 0.95rem;
+    }
+
+    .theme-alert-error {
+        border-color: color-mix(in srgb, var(--t-danger) 45%, transparent);
+        background-color: color-mix(in srgb, var(--t-danger) 12%, transparent);
+        color: var(--t-danger);
+    }
+
+    /* Tarjeta que se pinta con su propio tema dentro del selector. */
     .theme-preview {
         background-color: var(--t-bg);
         background-image: var(--t-bg-image);
@@ -336,5 +570,10 @@
 
     .theme-swatch-surface {
         background-color: var(--t-surface);
+    }
+
+    .theme-prose {
+        max-width: 68ch;
+        color: color-mix(in srgb, var(--t-ink) 88%, transparent);
     }
 }

@@ -26,6 +26,8 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        // La barra sigue el acento del tema activo (se resuelve en el navegador).
+        color: 'var(--t-accent)',
+        showSpinner: false,
     },
 });

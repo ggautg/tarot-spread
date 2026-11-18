@@ -4,17 +4,16 @@ import { route as ziggyRoute } from '../../../vendor/tightenco/ziggy';
 import { DEFAULT_THEME, getTheme, themes } from '@/themes';
 
 const STORAGE_KEY = 'oraculo.theme';
+
+/**
+ * Tema activo compartido por toda la aplicación.
+ *
+ * Es un `ref` de módulo: cualquier componente que llame a `useTheme()` ve el
+ * mismo valor y reacciona al cambio sin necesidad de un store externo.
+ */
 const currentId = ref(DEFAULT_THEME);
 
-function applyToDocument(id) {
-    if (typeof document === 'undefined') {
-        return;
-    }
-
-    document.documentElement.dataset.theme = id;
-    document.documentElement.style.colorScheme = getTheme(id).id === 'levi' ? 'light' : 'dark';
-}
-
+/** Lee la preferencia guardada en el dispositivo (puede fallar en modo privado). */
 function readStoredTheme() {
     if (typeof window === 'undefined') {
         return null;
@@ -27,6 +26,7 @@ function readStoredTheme() {
     }
 }
 
+/** Guarda la preferencia local; un fallo de almacenamiento no es crítico. */
 function storeTheme(id) {
     if (typeof window === 'undefined') {
         return;
@@ -35,13 +35,41 @@ function storeTheme(id) {
     try {
         window.localStorage.setItem(STORAGE_KEY, id);
     } catch {
-        // localStorage puede estar bloqueado (modo privado): no es crítico.
+        // Modo privado o almacenamiento bloqueado: el tema dura la sesión.
     }
 }
 
 /**
- * Se llama una sola vez desde app.js, antes de montar Inertia.
- * El tema del usuario logueado manda; si no hay, vale el guardado local.
+ * Aplica el tema al documento y sincroniza el color de la barra del navegador.
+ * El atributo `data-theme` es lo que activa las variables CSS del tema.
+ */
+function applyToDocument(id) {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    const theme = getTheme(id);
+
+    document.documentElement.dataset.theme = theme.id;
+    document.documentElement.style.colorScheme = theme.scheme ?? 'dark';
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+        const bg = getComputedStyle(document.documentElement)
+            .getPropertyValue('--t-bg')
+            .trim();
+
+        if (bg) {
+            meta.setAttribute('content', bg);
+        }
+    }
+}
+
+/**
+ * Se ejecuta una sola vez desde `app.js`, antes de montar Inertia.
+ *
+ * Prioridad: tema de la cuenta > preferencia local > tema por defecto.
+ * Aplicarlo antes del montaje evita el "flash" de un tema equivocado.
  */
 export function initTheme(pageProps) {
     const stored = readStoredTheme();
@@ -53,11 +81,38 @@ export function initTheme(pageProps) {
     applyToDocument(id);
 }
 
+/**
+ * Sincroniza el tema cuando cambia la sesión (por ejemplo, al iniciar sesión).
+ * No envía nada al servidor: la preferencia ya viene en las props de Inertia.
+ */
+export function syncUserTheme(userTheme) {
+    if (!userTheme) {
+        return;
+    }
+
+    const id = getTheme(userTheme).id;
+
+    if (id === currentId.value) {
+        return;
+    }
+
+    currentId.value = id;
+    storeTheme(id);
+    applyToDocument(id);
+}
+
+/**
+ * API pública del tema para los componentes.
+ */
 export function useTheme() {
     const page = usePage();
 
     const current = computed(() => getTheme(currentId.value));
 
+    /**
+     * Cambia el tema al instante y, si hay sesión, lo guarda en la cuenta.
+     * Los invitados conservan la preferencia solo en este dispositivo.
+     */
     function select(id) {
         const theme = getTheme(id);
 
@@ -69,8 +124,6 @@ export function useTheme() {
         applyToDocument(theme.id);
         storeTheme(theme.id);
 
-        // Los invitados viven en localStorage; los usuarios logueados
-        // además guardan la preferencia en su cuenta.
         if (page.props.auth?.user) {
             router.patch(
                 ziggyRoute('theme.update', undefined, undefined, page.props.ziggy),

@@ -1,13 +1,13 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import AppButton from '@/Components/AppButton.vue';
+import AppInput from '@/Components/AppInput.vue';
+import AppPanel from '@/Components/AppPanel.vue';
 
-const passwordInput = ref(null);
+/** Cambio de contraseña desde la cuenta. */
 const currentPasswordInput = ref(null);
+const passwordInput = ref(null);
 
 const form = useForm({
     current_password: '',
@@ -15,108 +15,87 @@ const form = useForm({
     password_confirmation: '',
 });
 
-const updatePassword = () => {
+function updatePassword() {
     form.put(route('password.update'), {
         preserveScroll: true,
         onSuccess: () => form.reset(),
         onError: () => {
             if (form.errors.password) {
                 form.reset('password', 'password_confirmation');
-                passwordInput.value.focus();
+                passwordInput.value?.focus();
             }
+
             if (form.errors.current_password) {
                 form.reset('current_password');
-                currentPasswordInput.value.focus();
+                currentPasswordInput.value?.focus();
             }
         },
     });
-};
+}
 </script>
 
 <template>
-    <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Update Password
-            </h2>
+    <AppPanel
+        eyebrow="Seguridad"
+        title="Contraseña"
+        subtitle="Usa una contraseña larga y distinta a la de otros sitios."
+    >
+        <form class="space-y-4" @submit.prevent="updatePassword">
+            <AppInput
+                id="current_password"
+                ref="currentPasswordInput"
+                v-model="form.current_password"
+                label="Contraseña actual"
+                type="password"
+                autocomplete="current-password"
+                :error="form.errors.current_password"
+            />
 
-            <p class="mt-1 text-sm text-gray-600">
-                Ensure your account is using a long, random password to stay
-                secure.
-            </p>
-        </header>
+            <AppInput
+                id="password"
+                ref="passwordInput"
+                v-model="form.password"
+                label="Nueva contraseña"
+                type="password"
+                autocomplete="new-password"
+                hint="Mínimo 8 caracteres."
+                :error="form.errors.password"
+            />
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
-            <div>
-                <InputLabel for="current_password" value="Current Password" />
+            <AppInput
+                id="password_confirmation"
+                v-model="form.password_confirmation"
+                label="Repite la nueva contraseña"
+                type="password"
+                autocomplete="new-password"
+                :error="form.errors.password_confirmation"
+            />
 
-                <TextInput
-                    id="current_password"
-                    ref="currentPasswordInput"
-                    v-model="form.current_password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="current-password"
-                />
-
-                <InputError
-                    :message="form.errors.current_password"
-                    class="mt-2"
-                />
-            </div>
-
-            <div>
-                <InputLabel for="password" value="New Password" />
-
-                <TextInput
-                    id="password"
-                    ref="passwordInput"
-                    v-model="form.password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError :message="form.errors.password" class="mt-2" />
-            </div>
-
-            <div>
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
-            </div>
-
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+            <div class="flex flex-wrap items-center gap-3">
+                <AppButton
+                    type="submit"
+                    size="sm"
+                    :loading="form.processing"
+                    loading-label="Guardando…"
+                >
+                    Cambiar contraseña
+                </AppButton>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
+                    enter-active-class="transition duration-200"
                     enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
+                    leave-active-class="transition duration-150"
                     leave-to-class="opacity-0"
                 >
-                    <p
+                    <span
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
+                        class="theme-label theme-accent text-[9px]"
+                        role="status"
                     >
-                        Saved.
-                    </p>
+                        ✓ Guardado
+                    </span>
                 </Transition>
             </div>
         </form>
-    </section>
+    </AppPanel>
 </template>

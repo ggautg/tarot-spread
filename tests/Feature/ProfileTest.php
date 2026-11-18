@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Reading;
+use App\Models\Spread;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,7 +18,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->get('/profile');
+            ->get('/perfil');
 
         $response->assertOk();
     }
@@ -27,14 +29,14 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch('/perfil', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/perfil');
 
         $user->refresh();
 
@@ -49,14 +51,14 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch('/perfil', [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/perfil');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -67,7 +69,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
+            ->delete('/perfil', [
                 'password' => 'password',
             ]);
 
@@ -85,15 +87,43 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
+            ->from('/perfil')
+            ->delete('/perfil', [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrors('password')
-            ->assertRedirect('/profile');
+            ->assertRedirect('/perfil');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_deleting_the_account_also_deletes_its_readings(): void
+    {
+        $user = User::factory()->create();
+
+        $spread = Spread::create([
+            'nombre' => 'Tres Cartas',
+            'slug' => 'tres-cartas',
+            'descripcion' => 'Pasado, presente y futuro.',
+            'cantidad_cartas' => 3,
+        ]);
+
+        $reading = Reading::create([
+            'spread_id' => $spread->id,
+            'user_id' => $user->id,
+            'session_id' => 'sesion-de-prueba',
+            'server_seed' => 'secreto',
+            'server_seed_hash' => hash('sha256', 'secreto'),
+            'client_seed' => 'publica',
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->delete('/perfil', ['password' => 'password'])
+            ->assertRedirect('/');
+
+        $this->assertNull($reading->fresh());
     }
 }

@@ -1,108 +1,127 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import OracleLayout from '@/Layouts/OracleLayout.vue';
+import SpreadCard from '@/Components/SpreadCard.vue';
+import EmptyState from '@/Components/EmptyState.vue';
+import AppButton from '@/Components/AppButton.vue';
 import { useTheme } from '@/composables/useTheme';
 
+/** Portada: presenta el oráculo y deja elegir una tirada. */
 defineProps({
-    spreads: Array,
+    spreads: { type: Array, default: () => [] },
 });
 
 const { current } = useTheme();
+
+const steps = [
+    {
+        number: '01',
+        title: 'Elige',
+        text: 'Escoge la tirada y, si quieres, escribe la pregunta que te trae aquí.',
+    },
+    {
+        number: '02',
+        title: 'Sella',
+        text: 'El servidor guarda un secreto y publica su huella. La tirada ya no puede cambiar.',
+    },
+    {
+        number: '03',
+        title: 'Abre y verifica',
+        text: 'Al abrir el sobre se reparten las cartas. Cualquiera puede comprobar el resultado.',
+    },
+];
 </script>
 
 <template>
     <Head title="El Oráculo" />
 
     <OracleLayout>
-        <div class="flex min-h-screen flex-col items-center justify-center px-6 py-16">
-            <Link
-                :href="route('readings.history')"
-                class="theme-btn-ghost absolute right-6 top-6 rounded px-4 py-2 text-xs"
-            >
-                Mis lecturas
-            </Link>
+        <div class="mx-auto w-full max-w-5xl px-4 sm:px-6">
+            <section class="py-14 text-center sm:py-20">
+                <p class="theme-accent text-4xl leading-none" aria-hidden="true">
+                    {{ current.glyph }}
+                </p>
 
-            <div class="theme-label theme-faint absolute left-6 top-6 text-[10px]">
-                <template v-if="$page.props.auth.user">
-                    {{ $page.props.auth.user.name }} ·
-                    <Link
-                        :href="route('logout')"
-                        method="post"
-                        as="button"
-                        class="theme-link"
+                <p class="theme-label theme-accent mt-5 text-[10px]">
+                    ✦ ✦ ✦
+                </p>
+
+                <h1 class="theme-display mt-2 text-5xl leading-none sm:text-7xl">
+                    El Oráculo
+                </h1>
+
+                <p class="theme-body theme-muted mx-auto mt-5 max-w-2xl text-xl leading-relaxed">
+                    Tarot honesto: elige una tirada, sella el sobre y ábrelo
+                    cuando estés listo. El resultado queda comprometido antes de
+                    revelarse.
+                </p>
+
+                <p class="theme-label theme-faint mt-6 text-[9px]">
+                    Corriente actual · {{ current.name }} — {{ current.epithet }}
+                </p>
+            </section>
+
+            <section aria-labelledby="spreads-title">
+                <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <p class="theme-label theme-accent text-[10px]">Tiradas</p>
+                        <h2 id="spreads-title" class="theme-display mt-1 text-3xl">
+                            Elige tu tirada
+                        </h2>
+                    </div>
+
+                    <AppButton
+                        v-if="$page.props.auth.user"
+                        :href="route('readings.history')"
+                        variant="quiet"
                     >
-                        Salir
-                    </Link>
-                </template>
-                <Link v-else :href="route('login')" class="theme-link">Iniciar sesión</Link>
-            </div>
+                        Ver mi historial →
+                    </AppButton>
+                </div>
 
-            <p class="theme-accent mb-4 text-3xl leading-none">{{ current.glyph }}</p>
-
-            <p class="theme-label theme-accent mb-3 text-[10px]">✦ ✦ ✦</p>
-
-            <h1 class="theme-display mb-2 text-center text-5xl sm:text-6xl">
-                El Oráculo
-            </h1>
-
-            <p class="theme-body theme-muted mb-2 text-center text-xl">
-                Elegí tu tirada
-            </p>
-
-            <p class="theme-label theme-faint mb-14 text-center text-[9px]">
-                Corriente actual · {{ current.name }} — {{ current.epithet }}
-            </p>
-
-            <div
-                class="grid w-full max-w-2xl gap-6"
-                :class="spreads.length > 1 ? 'sm:grid-cols-2' : ''"
-            >
-                <Link
-                    v-for="spread in spreads"
-                    :key="spread.id"
-                    :href="route('readings.create', spread.slug)"
-                    class="spread-card theme-panel group block p-8 text-center"
+                <div
+                    v-if="spreads.length"
+                    class="grid gap-5 sm:grid-cols-2"
                 >
-                    <p class="theme-label theme-accent mb-3 text-[9px]">
-                        {{ spread.positions_count }} cartas
-                    </p>
-                    <h2 class="theme-display mb-3 text-2xl">
-                        {{ spread.nombre }}
-                    </h2>
-                    <p class="theme-body theme-muted text-base leading-relaxed">
-                        {{ spread.descripcion }}
-                    </p>
-                </Link>
-            </div>
+                    <SpreadCard
+                        v-for="spread in spreads"
+                        :key="spread.id"
+                        :spread="spread"
+                    />
+                </div>
 
-            <p class="theme-faint theme-label mt-16 text-[9px]">
-                El sobre se compromete antes de abrirse · la tirada se puede verificar
-            </p>
+                <EmptyState
+                    v-else
+                    glyph="☾"
+                    title="Todavía no hay tiradas"
+                    text="El oráculo está preparando el mazo. Vuelve en un momento."
+                />
+            </section>
+
+            <section class="mt-16 sm:mt-20" aria-labelledby="how-title">
+                <p class="theme-label theme-accent text-[10px]">Cómo funciona</p>
+                <h2 id="how-title" class="theme-display mt-1 text-3xl">
+                    Sin trampas, sin sorpresas
+                </h2>
+
+                <div class="mt-6 grid gap-4 sm:grid-cols-3">
+                    <article
+                        v-for="step in steps"
+                        :key="step.number"
+                        class="theme-panel p-5"
+                    >
+                        <p class="theme-label theme-accent text-[9px]">
+                            {{ step.number }}
+                        </p>
+                        <h3 class="theme-display mt-2 text-xl">
+                            {{ step.title }}
+                        </h3>
+                        <p class="theme-body theme-muted mt-1.5 text-base leading-relaxed">
+                            {{ step.text }}
+                        </p>
+                    </article>
+                </div>
+            </section>
         </div>
     </OracleLayout>
 </template>
-
-<style scoped>
-.spread-card {
-    transition:
-        border-color 0.25s ease,
-        background-color 0.25s ease,
-        transform 0.25s ease;
-}
-
-.spread-card:hover {
-    border-color: var(--t-accent);
-    transform: translateY(-3px);
-    background-color: color-mix(in srgb, var(--t-surface) 72%, transparent);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .spread-card {
-        transition: none;
-    }
-
-    .spread-card:hover {
-        transform: none;
-    }
-}
-</style>

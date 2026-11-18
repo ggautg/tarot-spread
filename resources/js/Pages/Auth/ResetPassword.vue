@@ -1,20 +1,13 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import AuthCard from '@/Components/AuthCard.vue';
+import AppButton from '@/Components/AppButton.vue';
+import AppInput from '@/Components/AppInput.vue';
 
+/** Formulario de nueva contraseña, abierto desde el enlace del correo. */
 const props = defineProps({
-    email: {
-        type: String,
-        required: true,
-    },
-    token: {
-        type: String,
-        required: true,
-    },
+    email: { type: String, required: true },
+    token: { type: String, required: true },
 });
 
 const form = useForm({
@@ -24,78 +17,61 @@ const form = useForm({
     password_confirmation: '',
 });
 
-const submit = () => {
+function submit() {
     form.post(route('password.store'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
-};
+}
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Reset Password" />
+    <Head title="Nueva contraseña" />
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
+    <AuthCard
+        title="Nueva contraseña"
+        subtitle="Elige una contraseña que no uses en ningún otro sitio."
+    >
+        <form class="space-y-4" @submit.prevent="submit">
+            <AppInput
+                id="email"
+                v-model="form.email"
+                label="Correo electrónico"
+                type="email"
+                autocomplete="username"
+                required
+                :error="form.errors.email"
+            />
 
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
+            <AppInput
+                id="password"
+                v-model="form.password"
+                label="Nueva contraseña"
+                type="password"
+                autocomplete="new-password"
+                hint="Mínimo 8 caracteres."
+                required
+                autofocus
+                :error="form.errors.password"
+            />
 
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
+            <AppInput
+                id="password_confirmation"
+                v-model="form.password_confirmation"
+                label="Repite la contraseña"
+                type="password"
+                autocomplete="new-password"
+                required
+                :error="form.errors.password_confirmation"
+            />
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Reset Password
-                </PrimaryButton>
-            </div>
+            <AppButton
+                type="submit"
+                block
+                :loading="form.processing"
+                loading-label="Guardando…"
+            >
+                Guardar contraseña
+            </AppButton>
         </form>
-    </GuestLayout>
+    </AuthCard>
 </template>

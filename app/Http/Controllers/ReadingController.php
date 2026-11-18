@@ -2,16 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Card;
+use App\Http\Requests\StoreReadingRequest;
+use App\Http\Requests\UpdateReadingNotesRequest;
 use App\Models\Reading;
 use App\Models\Spread;
+use App\Services\ReadingService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Gestiona el ciclo visible de una tirada: elegirla, comprometerla, revelarla,
+ * guardarla en el historial y anotarla.
+ *
+ * La lógica pesada vive en `ReadingService` y `TarotDrawService`; aquí solo se
+ * resuelve HTTP (validación, permisos, respuestas Inertia y mensajes flash).
+ */
 class ReadingController extends Controller
 {
-    public function create(Spread $spread)
+    public function __construct(
+        private readonly ReadingService $readings,
+    ) {}
+
+    /**
+     * Muestra la pantalla previa a la tirada: descripción y pregunta opcional.
+     */
+    public function create(Spread $spread): Response
     {
         return Inertia::render('Readings/Create', [
             'spread' => $spread->load('positions'),
@@ -19,176 +37,123 @@ class ReadingController extends Controller
     }
 
     /**
-     * Paso 1 — COMMIT: el servidor genera su seed secreto y publica solo
-     * el hash. A partir de acá, el servidor ya no puede cambiar de resultado.
-     */
-    public function store(Request $request, Spread $spread)
-    {
-        $request->validate([
-            'pregunta' => 'nullable|string|max:255',
-        ]);
-
-        $serverSeed = Str::random(40);
-
-        $reading = Reading::create([
-            'spread_id'        => $spread->id,
-            'user_id'          => $request->user()?->id,
-            'session_id'       => $request->session()->getId(),
-            'server_seed'      => $serverSeed, // se guarda ya, pero no se muestra hasta el reveal
-            'server_seed_hash' => hash('sha256', $serverSeed),
-            'client_seed'      => Str::random(16), // aporte de aleatoriedad público desde el inicio
-            'pregunta'         => $request->pregunta,
-        ]);
-
-        return redirect()->route('readings.show', $reading->uuid);
-    }
-
-    /**
-     * Paso 2 — REVEAL: abre el sobre. Combina server_seed + client_seed,
-     * calcula la tirada, la persiste, y marca revealed_at para que no se
-     * pueda volver a revelar (y así tampoco recalcular con otro resultado).
-     */
-    public function reveal(Reading $reading)
-    {
-        if ($reading->revealed_at !== null) {
-            return redirect()->route('readings.show', $reading->uuid);
-        }
-
-        $finalSeed = hash('sha256', $reading->server_seed . $reading->client_seed);
-        $draw = $this->computeDraw($finalSeed, $reading->spread);
-
-        foreach ($reading->spread->positions()->orderBy('orden')->get() as $index => $position) {
-            $reading->cards()->create([
-                'spread_position_id' => $position->id,
-                'card_id'            => $draw[$index]['card_id'],
-                'invertida'          => $draw[$index]['invertida'],
-            ]);
-        }
-
-        $reading->update(['revealed_at' => now()]);
-
-        return redirect()->route('readings.show', $reading->uuid);
-    }
-
-    /**
-     * Calcula, de forma puramente determinística a partir del seed final,
-     * qué cartas salen y en qué orientación. No toca la base.
+     * Paso 1 — COMMIT.
      *
-     * @return array<int, array{card_id: int, invertida: bool}>
+     * El servidor genera su seed secreto y publica solo el hash. A partir de
+     * aquí el resultado queda comprometido: nadie puede cambiarlo sin que la
+     * verificación posterior lo detecte.
      */
-    private function computeDraw(string $seed, Spread $spread): array
+    public function store(StoreReadingRequest $request, Spread $spread): RedirectResponse
     {
-        $numericSeed = hexdec(substr($seed, 0, 8));
-        mt_srand($numericSeed);
+        $reading = $this->readings->commit(
+            spread: $spread,
+            user: $request->user(),
+            sessionId: $request->session()->getId(),
+            question: $request->validated('pregunta'),
+        );
 
-        $allCardIds = Card::orderBy('id')->pluck('id')->toArray();
-        $positionsCount = $spread->positions()->count();
-
-        for ($i = count($allCardIds) - 1; $i > 0; $i--) {
-            $j = mt_rand(0, $i);
-            [$allCardIds[$i], $allCardIds[$j]] = [$allCardIds[$j], $allCardIds[$i]];
-        }
-
-        $drawnCardIds = array_slice($allCardIds, 0, $positionsCount);
-
-        $result = [];
-        foreach ($drawnCardIds as $cardId) {
-            $result[] = [
-                'card_id'   => $cardId,
-                'invertida' => (bool) mt_rand(0, 1),
-            ];
-        }
-
-        mt_srand();
-
-        return $result;
+        return redirect()
+            ->route('readings.show', $reading->uuid)
+            ->with('success', 'El sobre quedó sellado. Ábrelo cuando estés listo.');
     }
 
-    public function show(Reading $reading)
+    /**
+     * Paso 2 — REVEAL.
+     *
+     * Combina `server_seed` + `client_seed`, reparte las cartas y marca
+     * `revealed_at`. Es idempotente: repetir la petición no vuelve a tirar.
+     */
+    public function reveal(Reading $reading): RedirectResponse
     {
-        $reading->load(['spread.positions', 'cards.card', 'cards.position']);
+        $reading = $this->readings->reveal($reading);
+
+        return redirect()
+            ->route('readings.show', $reading->uuid)
+            ->with('success', 'El sobre se abrió. Que las cartas te iluminen.');
+    }
+
+    /**
+     * Muestra el tablero. Incluye el resultado de la verificación criptográfica
+     * cuando la lectura ya fue revelada.
+     */
+    public function show(Request $request, Reading $reading): Response
+    {
+        $reading->load([
+            'spread.positions',
+            'cards.card',
+            'cards.position',
+        ]);
+
+        $canEdit = $reading->isOwnedBy($request->user(), $request->session()->getId());
+
+        // El identificador de sesión nunca sale del servidor. Las notas son
+        // privadas: solo su dueño las recibe (y solo él ve el formulario).
+        $reading->makeHidden('session_id');
+
+        // Mientras el sobre está sellado, `server_seed` es el secreto del
+        // compromiso: exponerlo antes de revelar permitiría anticipar el
+        // resultado. Se publica únicamente después de abrir la lectura.
+        if (! $reading->isRevealed()) {
+            $reading->makeHidden('server_seed');
+        }
+
+        if (! $canEdit) {
+            $reading->makeHidden('notas_personales');
+        }
 
         return Inertia::render('Readings/Show', [
-            'reading'  => $reading,
-            'verified' => $reading->revealed_at ? $this->verify($reading) : null,
+            'reading' => $reading,
+            'canEdit' => $canEdit,
+            'verified' => $reading->isRevealed() ? $this->readings->verify($reading) : null,
         ]);
     }
 
     /**
-     * Verificación en dos partes:
-     * 1) el server_seed revelado realmente corresponde al hash publicado al comprometer
-     * 2) la tirada persistida realmente sale de combinar ese server_seed + client_seed
-     * Si cualquiera de las dos falla, algo fue manipulado después del commit.
+     * Historial del visitante: lecturas de su cuenta o, si es anónimo, de su
+     * propia sesión. Nunca mezcla lecturas de otras personas.
      */
-    private function verify(Reading $reading): bool
+    public function history(Request $request): Response
     {
-        $hashMatches = hash('sha256', $reading->server_seed) === $reading->server_seed_hash;
-
-        $finalSeed = hash('sha256', $reading->server_seed . $reading->client_seed);
-        $draw = $this->computeDraw($finalSeed, $reading->spread);
-
-        $storedCards = $reading->cards()
-            ->join('spread_positions', 'reading_cards.spread_position_id', '=', 'spread_positions.id')
-            ->orderBy('spread_positions.orden')
-            ->select('reading_cards.card_id', 'reading_cards.invertida')
+        $readings = Reading::query()
+            ->with('spread')
+            ->withCount('cards')
+            ->visibleTo($request->user(), $request->session()->getId())
+            ->latest()
             ->get();
 
-        if ($storedCards->count() !== count($draw)) {
-            return false;
-        }
-
-        foreach ($storedCards as $index => $stored) {
-            if ((int) $stored->card_id !== $draw[$index]['card_id']
-                || (bool) $stored->invertida !== $draw[$index]['invertida']) {
-                return false;
-            }
-        }
-
-        return $hashMatches;
-    }
-
-    public function history(Request $request)
-    {
-        $query = Reading::with('spread')->latest();
-
-        if ($request->user()) {
-            $query->where('user_id', $request->user()->id);
-        } else {
-            $query->where('session_id', $request->session()->getId())->whereNull('user_id');
-        }
-
         return Inertia::render('Readings/History', [
-            'readings' => $query->get(),
+            'readings' => $readings,
         ]);
     }
 
-    public function updateNotes(Request $request, Reading $reading)
+    /**
+     * Guarda las notas privadas. Solo el dueño de la lectura puede escribir.
+     */
+    public function updateNotes(UpdateReadingNotesRequest $request, Reading $reading): RedirectResponse
     {
-        $isOwner = $request->user()
-            ? $reading->user_id === $request->user()->id
-            : ($reading->user_id === null && $reading->session_id === $request->session()->getId());
+        abort_unless(
+            $reading->isOwnedBy($request->user(), $request->session()->getId()),
+            403,
+        );
 
-        abort_unless($isOwner, 403);
-
-        $request->validate([
-            'notas_personales' => 'nullable|string|max:2000',
+        $reading->update([
+            'notas_personales' => $request->validated('notas_personales'),
         ]);
 
-        $reading->update(['notas_personales' => $request->notas_personales]);
-
-        return back();
+        return back()->with('success', 'Notas guardadas.');
     }
 
-    public function destroy(Request $request, Reading $reading)
+    /**
+     * Borra una lectura y, en cascada, sus cartas.
+     */
+    public function destroy(Request $request, Reading $reading): RedirectResponse
     {
-        // Solo el dueño puede borrar: mismo usuario logueado, o misma sesión si es anónima
-        $isOwner = $request->user()
-            ? $reading->user_id === $request->user()->id
-            : ($reading->user_id === null && $reading->session_id === $request->session()->getId());
+        abort_unless(
+            $reading->isOwnedBy($request->user(), $request->session()->getId()),
+            403,
+        );
 
-        abort_unless($isOwner, 403);
-
-        $reading->delete(); // cascadeOnDelete en reading_cards se encarga del resto
+        DB::transaction(fn () => $reading->delete());
 
         return back()->with('success', 'Lectura eliminada.');
     }

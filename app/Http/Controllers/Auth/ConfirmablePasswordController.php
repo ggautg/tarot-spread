@@ -10,10 +10,17 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Confirmación de contraseña para acciones sensibles.
+ *
+ * Laravel pide repetir la contraseña antes de entrar en zonas protegidas
+ * (`password.confirm`); el resultado se guarda en sesión durante un tiempo
+ * limitado.
+ */
 class ConfirmablePasswordController extends Controller
 {
     /**
-     * Show the confirm password view.
+     * Muestra la pantalla de confirmación.
      */
     public function show(): Response
     {
@@ -21,7 +28,7 @@ class ConfirmablePasswordController extends Controller
     }
 
     /**
-     * Confirm the user's password.
+     * Valida la contraseña actual y marca la confirmación como vigente.
      */
     public function store(Request $request): RedirectResponse
     {

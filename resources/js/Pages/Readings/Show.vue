@@ -1,265 +1,264 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
 import OracleLayout from '@/Layouts/OracleLayout.vue';
+import AppButton from '@/Components/AppButton.vue';
+import AppPanel from '@/Components/AppPanel.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import PositionList from '@/Components/PositionList.vue';
+import ReadingBoard from '@/Components/ReadingBoard.vue';
+import ReadingCardDetail from '@/Components/ReadingCardDetail.vue';
+import ReadingNotesForm from '@/Components/ReadingNotesForm.vue';
+import { formatDate } from '@/utils/formatDate';
 
+/**
+ * Tablero de una lectura.
+ *
+ * Antes de revelar muestra los dorsos y el compromiso (hash + seed público).
+ * Después de revelar, las cartas se voltean en cascada y aparece el detalle de
+ * cada posición, la verificación criptográfica y las notas privadas del dueño.
+ */
 const props = defineProps({
-  reading: Object,
-  verified: {
-    type: Boolean,
-    default: null,
-  },
+    reading: { type: Object, required: true },
+    canEdit: { type: Boolean, default: false },
+    /** null = sin revelar; true/false = resultado de la verificación. */
+    verified: { type: Boolean, default: null },
 });
 
-const notesForm = useForm({
-  notas_personales: props.reading.notas_personales || '',
-});
+const revealed = computed(() => Boolean(props.reading.revealed_at));
 
-const notesSaved = ref(false);
-
-function saveNotes() {
-  notesForm.patch(route('readings.notes', props.reading.uuid), {
-    preserveScroll: true,
-    onSuccess: () => {
-      notesSaved.value = true;
-      setTimeout(() => (notesSaved.value = false), 2000);
-    },
-  });
-}
-
-const revealed = ref(new Set(props.reading.cards.map(rc => rc.id)));
-const copied = ref(false);
-
-// Al revelar, Inertia actualiza las props sin volver a montar el componente.
-// Sincronizamos el set para que las cartas ya reveladas se den vuelta solas.
-watch(
-  () => props.reading.cards,
-  (cards) => {
-    revealed.value = new Set(cards.map(rc => rc.id));
-  },
+const sortedCards = computed(() =>
+    [...props.reading.cards].sort(
+        (a, b) => (a.position?.orden ?? 0) - (b.position?.orden ?? 0),
+    ),
 );
 
-function copyLink() {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    copied.value = true;
-    setTimeout(() => (copied.value = false), 2000);
-  });
+const copyState = ref('idle');
+let copyTimer = null;
+
+const copyLabel = computed(() => {
+    if (copyState.value === 'copied') {
+        return '✓ Enlace copiado';
+    }
+
+    if (copyState.value === 'error') {
+        return 'No se pudo copiar';
+    }
+
+    return 'Copiar enlace';
+});
+
+/** Copia la URL pública de la lectura, con aviso temporal. */
+async function copyLink() {
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyState.value = 'copied';
+    } catch {
+        copyState.value = 'error';
+    }
+
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => (copyState.value = 'idle'), 2500);
 }
 
-function toggleReveal(cardId) {
-  if (revealed.value.has(cardId)) return;
-  revealed.value.add(cardId);
-  revealed.value = new Set(revealed.value); // forzar reactividad
-}
-
-function isRevealed(cardId) {
-  return revealed.value.has(cardId);
-}
+onBeforeUnmount(() => clearTimeout(copyTimer));
 </script>
 
 <template>
-  <Head :title="reading.spread.nombre">
-    <meta property="og:title" :content="`Tirada de ${reading.spread.nombre}`" />
-    <meta
-      property="og:description"
-      :content="reading.pregunta ? `«${reading.pregunta}»` : `Una lectura de ${reading.spread.nombre} revelada en El Oráculo.`"
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" :content="`${$page.props.appUrl}/og-tarot.png`" />
-    <meta name="twitter:card" content="summary_large_image" />
-  </Head>
-
-  <OracleLayout>
-    <div class="min-h-screen px-6 py-10 pb-28">
-      <Link
-        :href="route('home')"
-        class="theme-btn-ghost absolute left-6 top-6 rounded px-4 py-2 text-xs"
-      >
-        ← Inicio
-      </Link>
-
-      <div class="mx-auto mb-4 max-w-3xl pt-14 text-center">
-        <p class="theme-label theme-accent text-[10px]">
-          {{ reading.spread.nombre }}
-        </p>
-        <p v-if="reading.pregunta" class="theme-body theme-muted mt-2 text-lg italic">
-          "{{ reading.pregunta }}"
-        </p>
-        <p class="theme-faint mt-3 break-all font-mono text-[10px]">
-          hash del compromiso: {{ reading.server_seed_hash }}
-        </p>
-
-        <div v-if="reading.revealed_at" class="mt-2 flex items-center justify-center gap-2 font-mono text-[10px]">
-          <span v-if="verified" class="theme-accent">✓ Tirada verificada — el sobre no fue tocado</span>
-          <span v-else class="theme-danger-text">✕ No se pudo verificar esta tirada</span>
-        </div>
-
-        <button
-          class="theme-btn-ghost mt-4 inline-flex items-center gap-2 rounded px-4 py-2 text-[9px]"
-          @click="copyLink"
-        >
-          {{ copied ? '✓ Copiado' : 'Copiar link' }}
-        </button>
-      </div>
-
-      <!-- Pantalla de compromiso: todavía no se tiraron las cartas -->
-      <div v-if="!reading.revealed_at" class="mx-auto mt-16 max-w-md text-center">
-        <p class="theme-body theme-muted mb-8 text-lg leading-relaxed">
-          El sobre está cerrado. El servidor ya comprometió su seed secreto —
-          el hash de arriba es la prueba. Al abrir el sobre, se combina con tu
-          seed público para determinar la tirada, y el servidor revela su seed
-          para que cualquiera pueda verificar que no cambió de opinión.
-        </p>
-        <Link
-          :href="route('readings.reveal', reading.uuid)"
-          method="post"
-          as="button"
-          class="theme-btn rounded px-8 py-3 text-sm font-semibold"
-        >
-          Abrir el sobre
-        </Link>
-      </div>
-
-      <!-- Layout relativo, posicionado con coord_x / coord_y de spread_positions -->
-      <div class="relative mx-auto aspect-[4/3] max-w-3xl">
-        <div
-          v-for="rc in reading.cards"
-          :key="rc.id"
-          class="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-          :style="{
-            left: rc.position.coord_x + '%',
-            top: rc.position.coord_y + '%',
-            transform: `translate(-50%, -50%) rotate(${rc.position.rotacion}deg)`,
-            zIndex: rc.position.orden,
-          }"
-          @click="toggleReveal(rc.id)"
-        >
-          <div class="flip-card" :class="{ flipped: isRevealed(rc.id) }">
-            <span
-              class="theme-accent-badge absolute -right-2 -top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full font-mono text-[10px] font-bold"
-            >
-              {{ rc.position.orden }}
-            </span>
-            <div class="flip-inner">
-              <!-- Dorso -->
-              <div class="flip-face flip-back">
-                <div class="card-back flex h-full w-full items-center justify-center rounded border-2">
-                  <span class="theme-accent text-2xl">✦</span>
-                </div>
-              </div>
-              <!-- Frente -->
-              <div class="flip-face flip-front">
-                <div
-                  class="flex h-full w-full flex-col justify-between rounded border-2 p-2 text-center"
-                  :class="rc.invertida ? 'card-face-down' : 'card-face-up'"
-                  :style="{ transform: rc.invertida ? 'rotate(180deg)' : 'none' }"
-                >
-                  <p class="theme-body text-[9px] leading-tight">
-                    {{ rc.card.name }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p class="theme-label theme-faint -ml-4 mt-1 w-24 text-center text-[8px]">
-            {{ rc.position.nombre_posicion }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Detalle de cartas reveladas -->
-      <div class="mx-auto mt-16 max-w-2xl space-y-6">
-        <div
-          v-for="rc in reading.cards.filter(c => isRevealed(c.id))"
-          :key="'detail-' + rc.id"
-          class="theme-rule border-t pt-4"
-        >
-          <p class="theme-label theme-accent mb-1 text-[9px]">
-            {{ rc.position.nombre_posicion }}
-          </p>
-          <h3 class="theme-display mb-1 text-xl">
-            {{ rc.card.name }} <span v-if="rc.invertida" class="theme-danger-text text-sm">(invertida)</span>
-          </h3>
-          <p class="theme-body text-lg leading-relaxed opacity-85">
-            {{ rc.invertida ? rc.card.meaning_rev : rc.card.meaning_up }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Notas personales -->
-      <div v-if="reading.revealed_at" class="theme-rule mx-auto mt-12 max-w-2xl border-t pt-8">
-        <p class="theme-label theme-accent mb-3 text-[9px]">
-          Tus notas
-        </p>
-        <textarea
-          v-model="notesForm.notas_personales"
-          rows="4"
-          placeholder="¿Cómo te sentiste con esta lectura? ¿Se cumplió algo, te dolió, te hizo pensar?"
-          class="theme-input w-full resize-none px-4 py-3"
+    <Head :title="`Lectura · ${reading.spread.nombre}`">
+        <meta property="og:title" :content="`Tirada de ${reading.spread.nombre}`" />
+        <meta
+            property="og:description"
+            :content="reading.pregunta
+                ? `«${reading.pregunta}»`
+                : `Una lectura de ${reading.spread.nombre} revelada en El Oráculo.`"
         />
-        <div class="mt-3 flex items-center gap-3">
-          <button
-            class="theme-btn rounded px-5 py-2 text-xs font-semibold"
-            :disabled="notesForm.processing"
-            @click="saveNotes"
-          >
-            Guardar notas
-          </button>
-          <span v-if="notesSaved" class="theme-label theme-accent text-[9px]">✓ Guardado</span>
+        <meta property="og:type" content="website" />
+        <meta property="og:image" :content="`${$page.props.appUrl}/og-tarot.png`" />
+        <meta name="twitter:card" content="summary_large_image" />
+    </Head>
+
+    <OracleLayout>
+        <div class="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+            <PageHeader
+                eyebrow="Lectura"
+                :title="reading.spread.nombre"
+                :back-href="route('home')"
+                back-label="Volver a las tiradas"
+            >
+                <template #actions>
+                    <AppButton variant="ghost" size="sm" @click="copyLink">
+                        {{ copyLabel }}
+                    </AppButton>
+                    <AppButton :href="route('readings.history')" variant="quiet">
+                        Historial
+                    </AppButton>
+                </template>
+
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                    <span class="theme-chip">{{ reading.cards.length }} cartas</span>
+                    <span class="theme-chip">{{ formatDate(reading.created_at) }}</span>
+
+                    <span v-if="!revealed" class="theme-chip theme-chip-danger">
+                        Sobre sellado
+                    </span>
+                    <span v-else-if="verified" class="theme-chip">
+                        ✓ Verificada
+                    </span>
+                    <span v-else-if="verified === false" class="theme-chip theme-chip-danger">
+                        ✕ Verificación fallida
+                    </span>
+                </div>
+
+                <blockquote
+                    v-if="reading.pregunta"
+                    class="theme-body theme-muted mt-5 max-w-2xl border-l-2 pl-4 text-xl italic leading-relaxed"
+                    style="border-color: color-mix(in srgb, var(--t-accent) 45%, transparent)"
+                >
+                    «{{ reading.pregunta }}»
+                </blockquote>
+            </PageHeader>
+
+            <section class="theme-panel p-3 sm:p-6" aria-label="Tablero de cartas">
+                <ReadingBoard
+                    :positions="reading.spread.positions"
+                    :cards="reading.cards"
+                    :revealed="revealed"
+                />
+            </section>
+
+            <!-- Paso pendiente: abrir el sobre. -->
+            <AppPanel
+                v-if="!revealed"
+                class="mt-6"
+                eyebrow="Paso 2"
+                title="El sobre está sellado"
+                subtitle="El servidor ya eligió un secreto y publicó su huella. Nada puede cambiar el resultado que saldrá de aquí."
+            >
+                <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="theme-body theme-muted max-w-xl text-base leading-relaxed">
+                        Al abrirlo, el secreto del servidor se combina con la semilla
+                        pública de esta lectura. Recién entonces se reparten las cartas.
+                    </p>
+
+                    <AppButton
+                        :href="route('readings.reveal', reading.uuid)"
+                        method="post"
+                        as="button"
+                        size="lg"
+                    >
+                        Abrir el sobre
+                    </AppButton>
+                </div>
+
+                <div class="mt-6">
+                    <p class="theme-label theme-accent mb-2 text-[9px]">Posiciones</p>
+                    <PositionList :positions="reading.spread.positions" />
+                </div>
+            </AppPanel>
+
+            <!-- Resultado revelado. -->
+            <section
+                v-else
+                class="mt-8"
+                aria-labelledby="cards-detail-title"
+            >
+                <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <p class="theme-label theme-accent text-[10px]">Interpretación</p>
+                        <h2 id="cards-detail-title" class="theme-display mt-1 text-3xl">
+                            Las cartas
+                        </h2>
+                    </div>
+                    <p class="theme-label theme-faint text-[8px]">
+                        {{ reading.spread.positions.length }} posiciones · significado según orientación
+                    </p>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <ReadingCardDetail
+                        v-for="(readingCard, index) in sortedCards"
+                        :key="readingCard.id"
+                        :reading-card="readingCard"
+                        :index="index"
+                    />
+                </div>
+            </section>
+
+            <!-- Compromiso y verificación. -->
+            <details class="theme-panel mt-6 p-5 sm:p-6">
+                <summary class="cursor-pointer list-none">
+                    <span class="theme-label theme-accent text-[9px]">
+                        Verificación del compromiso
+                    </span>
+                    <span class="theme-body theme-muted ml-2 text-sm">
+                        {{ revealed ? 'Huella, semillas y resultado' : 'Huella y semilla pública' }}
+                    </span>
+                </summary>
+
+                <div class="mt-4 space-y-4">
+                    <p class="theme-body theme-muted text-sm leading-relaxed">
+                        El hash publicado se calculó con SHA-256 sobre el secreto del
+                        servidor. Al revelar, ese secreto se hace público: si coincide
+                        con el hash y las cartas coinciden con el reparto, la lectura
+                        no fue alterada.
+                    </p>
+
+                    <dl class="grid gap-3 sm:grid-cols-2">
+                        <div class="min-w-0">
+                            <dt class="theme-label theme-faint text-[8px]">Hash del compromiso</dt>
+                            <dd class="mt-1 break-all font-mono text-[11px] leading-relaxed">
+                                {{ reading.server_seed_hash }}
+                            </dd>
+                        </div>
+
+                        <div class="min-w-0">
+                            <dt class="theme-label theme-faint text-[8px]">Semilla pública</dt>
+                            <dd class="mt-1 break-all font-mono text-[11px] leading-relaxed">
+                                {{ reading.client_seed }}
+                            </dd>
+                        </div>
+
+                        <div v-if="revealed" class="min-w-0">
+                            <dt class="theme-label theme-faint text-[8px]">Secreto del servidor</dt>
+                            <dd class="mt-1 break-all font-mono text-[11px] leading-relaxed">
+                                {{ reading.server_seed }}
+                            </dd>
+                        </div>
+
+                        <div v-if="revealed" class="min-w-0">
+                            <dt class="theme-label theme-faint text-[8px]">Fecha de apertura</dt>
+                            <dd class="mt-1 text-sm">
+                                {{ formatDate(reading.revealed_at) }}
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <p
+                        v-if="revealed"
+                        class="text-sm leading-relaxed"
+                        :class="verified ? 'theme-accent' : 'theme-danger-text'"
+                    >
+                        <template v-if="verified">
+                            ✓ Verificación correcta: el compromiso y las cartas coinciden.
+                        </template>
+                        <template v-else>
+                            ✕ No se pudo verificar esta lectura. El resultado no debería
+                            considerarse confiable.
+                        </template>
+                    </p>
+                </div>
+            </details>
+
+            <!-- Notas: solo el dueño de la lectura. -->
+            <AppPanel
+                v-if="revealed && canEdit"
+                class="mt-6"
+                eyebrow="Diario"
+                title="Tus notas"
+            >
+                <ReadingNotesForm :reading="reading" />
+            </AppPanel>
         </div>
-      </div>
-    </div>
-  </OracleLayout>
+    </OracleLayout>
 </template>
-
-<style scoped>
-.theme-accent-badge {
-  background-color: var(--t-accent);
-  color: var(--t-bg);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
-}
-
-.card-back {
-  background-color: var(--t-card-back);
-  border-color: color-mix(in srgb, var(--t-accent) 60%, transparent);
-}
-
-.card-face-up {
-  border-color: var(--t-accent);
-  background-color: color-mix(in srgb, var(--t-ink) 7%, transparent);
-}
-
-.card-face-down {
-  border-color: var(--t-danger);
-  background-color: color-mix(in srgb, var(--t-danger) 14%, transparent);
-}
-
-.flip-card {
-  position: relative;
-  width: 64px;
-  height: 96px;
-  perspective: 800px;
-}
-.flip-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-}
-.flip-card.flipped .flip-inner {
-  transform: rotateY(180deg);
-}
-.flip-face {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-}
-.flip-back {
-  transform: rotateY(0deg);
-}
-.flip-front {
-  transform: rotateY(180deg);
-}
-</style>

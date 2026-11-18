@@ -1,68 +1,59 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import AuthCard from '@/Components/AuthCard.vue';
+import AppButton from '@/Components/AppButton.vue';
+import AppInput from '@/Components/AppInput.vue';
 
+/** Solicitud del enlace para restablecer la contraseña. */
 defineProps({
-    status: {
-        type: String,
-    },
+    status: { type: String, default: '' },
 });
 
 const form = useForm({
     email: '',
 });
 
-const submit = () => {
+function submit() {
     form.post(route('password.email'));
-};
+}
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Forgot Password" />
+    <Head title="Recuperar contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
-        </div>
-
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
-        >
+    <AuthCard
+        title="Recuperar contraseña"
+        subtitle="Escribe tu correo y te enviaremos un enlace para elegir una nueva."
+    >
+        <p v-if="status" class="theme-alert mb-4 text-sm" role="status">
             {{ status }}
-        </div>
+        </p>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
+        <form class="space-y-4" @submit.prevent="submit">
+            <AppInput
+                id="email"
+                v-model="form.email"
+                label="Correo electrónico"
+                type="email"
+                autocomplete="username"
+                placeholder="tu@correo.com"
+                required
+                autofocus
+                :error="form.errors.email"
+            />
 
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
+            <AppButton
+                type="submit"
+                block
+                :loading="form.processing"
+                loading-label="Enviando…"
+            >
+                Enviar enlace
+            </AppButton>
         </form>
-    </GuestLayout>
+
+        <template #footer>
+            <Link :href="route('login')" class="theme-link">Volver a entrar</Link>
+        </template>
+    </AuthCard>
 </template>

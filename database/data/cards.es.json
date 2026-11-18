@@ -1,0 +1,395 @@
+{
+    "_lectura": "Traducción al español (Rider–Waite) usada por CardSeeder. Clave = name_short de la API original. Los campos type, suit, value y desc se conservan del catálogo fuente.",
+    "cards": {
+        "ar00": {
+            "name": "El Loco",
+            "meaning_up": "Comienzo, espontaneidad y fe en lo desconocido. Un salto confiado hacia una etapa nueva.",
+            "meaning_rev": "Imprudencia o miedo a empezar; falta de dirección o de compromiso."
+        },
+        "ar01": {
+            "name": "El Mago",
+            "meaning_up": "Voluntad, habilidad y recursos a tu alcance. Es momento de actuar con decisión.",
+            "meaning_rev": "Manipulación, talento desaprovechado o falta de foco."
+        },
+        "ar02": {
+            "name": "La Sacerdotisa",
+            "meaning_up": "Intuición, silencio y sabiduría interior. La respuesta está en tu mundo interno.",
+            "meaning_rev": "Bloqueo intuitivo, secretos o desconexión de tu voz interior."
+        },
+        "ar03": {
+            "name": "La Emperatriz",
+            "meaning_up": "Abundancia, cuidado y creatividad fértil. Lo que nutres crece.",
+            "meaning_rev": "Dependencia, estancamiento creativo o descuido de ti."
+        },
+        "ar04": {
+            "name": "El Emperador",
+            "meaning_up": "Orden, autoridad y estructura. Toma el control con disciplina.",
+            "meaning_rev": "Rigidez, abuso de poder o falta de límites claros."
+        },
+        "ar05": {
+            "name": "El Hierofante",
+            "meaning_up": "Tradición, enseñanza y guía. Busca consejo en una estructura probada.",
+            "meaning_rev": "Dogmatismo, rebeldía o necesidad de cuestionar las normas."
+        },
+        "ar06": {
+            "name": "Los Enamorados",
+            "meaning_up": "Elección, vínculo y armonía. Decide con el corazón y con coherencia.",
+            "meaning_rev": "Desacuerdo, tentación o una elección que no asumes."
+        },
+        "ar07": {
+            "name": "El Carro",
+            "meaning_up": "Avance, determinación y victoria. Dirige tu energía hacia una meta.",
+            "meaning_rev": "Falta de rumbo, impulsividad o fuerzas que se contradicen."
+        },
+        "ar08": {
+            "name": "La Fortaleza",
+            "meaning_up": "Coraje sereno, paciencia y dominio de sí. La calma vence la fuerza bruta.",
+            "meaning_rev": "Inseguridad, desgaste o impulsos que dominan la razón."
+        },
+        "ar09": {
+            "name": "El Ermitaño",
+            "meaning_up": "Introspección, soledad fértil y búsqueda de verdad. Aléjate del ruido para ver claro.",
+            "meaning_rev": "Aislamiento, evasión o negación de la propia luz."
+        },
+        "ar10": {
+            "name": "La Rueda de la Fortuna",
+            "meaning_up": "Ciclos, cambios y oportunidad. Lo que gira trae nuevos aires.",
+            "meaning_rev": "Resistencia al cambio, mala racha o sensación de perder el control."
+        },
+        "ar11": {
+            "name": "La Justicia",
+            "meaning_up": "Equilibrio, verdad y responsabilidad. Cada acción tiene su consecuencia.",
+            "meaning_rev": "Injusticia, evasión o decisiones tomadas a medias."
+        },
+        "ar12": {
+            "name": "El Colgado",
+            "meaning_up": "Pausa, entrega y cambio de perspectiva. Soltar también es avanzar.",
+            "meaning_rev": "Estancamiento, sacrificio inútil o resistencia a soltar."
+        },
+        "ar13": {
+            "name": "La Muerte",
+            "meaning_up": "Final y transformación necesaria. Algo termina para que otra cosa nazca.",
+            "meaning_rev": "Miedo al cambio, apego o una transición que se demora."
+        },
+        "ar14": {
+            "name": "La Templanza",
+            "meaning_up": "Equilibrio, medida y sanación. Mezcla paciencia y propósito.",
+            "meaning_rev": "Exceso, impaciencia o desarmonía entre lo que sientes y haces."
+        },
+        "ar15": {
+            "name": "El Diablo",
+            "meaning_up": "Deseo, apego y sombra. Reconoce qué te ata para liberarte.",
+            "meaning_rev": "Ruptura de ataduras, claridad o liberación de un vicio."
+        },
+        "ar16": {
+            "name": "La Torre",
+            "meaning_up": "Ruptura súbita y verdad que derriba lo falso. Limpia para reconstruir.",
+            "meaning_rev": "Crisis evitada, cambio lento o resistencia a lo inevitable."
+        },
+        "ar17": {
+            "name": "La Estrella",
+            "meaning_up": "Esperanza, inspiración y curación. Confía: la luz vuelve tras la tormenta.",
+            "meaning_rev": "Desánimo, falta de fe o heridas que piden más tiempo."
+        },
+        "ar18": {
+            "name": "La Luna",
+            "meaning_up": "Misterio, intuición y emociones profundas. No todo es lo que parece.",
+            "meaning_rev": "Confusión que se disipa, miedos revelados o engaño descubierto."
+        },
+        "ar19": {
+            "name": "El Sol",
+            "meaning_up": "Alegría, claridad y éxito. La verdad sale a la luz.",
+            "meaning_rev": "Tristeza pasajera, éxito demorado o exceso de optimismo."
+        },
+        "ar20": {
+            "name": "El Juicio",
+            "meaning_up": "Despertar, llamada interior y renacimiento. Responde a lo que te reclama.",
+            "meaning_rev": "Autocrítica excesiva, culpa o una llamada que ignoras."
+        },
+        "ar21": {
+            "name": "El Mundo",
+            "meaning_up": "Culminación, plenitud y cierre de un ciclo. Celebra lo logrado.",
+            "meaning_rev": "Asuntos pendientes, cierre incompleto o miedo a terminar."
+        },
+        "waac": {
+            "name": "As de Bastos",
+            "meaning_up": "Chispa de inspiración, energía nueva y deseo de crear.",
+            "meaning_rev": "Bloqueo creativo, oportunidad perdida o energía dispersa."
+        },
+        "wa02": {
+            "name": "Dos de Bastos",
+            "meaning_up": "Planificación, visión y elección de camino.",
+            "meaning_rev": "Miedo a decidir, planes que no arrancan."
+        },
+        "wa03": {
+            "name": "Tres de Bastos",
+            "meaning_up": "Expansión, progreso y horizontes que se abren.",
+            "meaning_rev": "Retrasos, falta de visión o resultados que tardan."
+        },
+        "wa04": {
+            "name": "Cuatro de Bastos",
+            "meaning_up": "Celebración, estabilidad y hogar en armonía.",
+            "meaning_rev": "Inseguridad en el hogar, celebración postergada o cambio de base."
+        },
+        "wa05": {
+            "name": "Cinco de Bastos",
+            "meaning_up": "Competencia, conflictos y choque de egos.",
+            "meaning_rev": "Conflicto evitado, tregua o tensión que se disuelve."
+        },
+        "wa06": {
+            "name": "Seis de Bastos",
+            "meaning_up": "Victoria, reconocimiento y orgullo merecido.",
+            "meaning_rev": "Falta de reconocimiento, éxito dudoso o ego herido."
+        },
+        "wa07": {
+            "name": "Siete de Bastos",
+            "meaning_up": "Defensa de lo tuyo, perseverancia frente a la crítica.",
+            "meaning_rev": "Agotamiento, rendición o defensa excesiva."
+        },
+        "wa08": {
+            "name": "Ocho de Bastos",
+            "meaning_up": "Rapidez, noticias y movimiento. Todo se acelera.",
+            "meaning_rev": "Demoras, mensajes confusos o impulsos apresurados."
+        },
+        "wa09": {
+            "name": "Nueve de Bastos",
+            "meaning_up": "Resistencia, coraje y última batalla antes del descanso.",
+            "meaning_rev": "Cansancio, paranoia o defensas que ya no sirven."
+        },
+        "wa10": {
+            "name": "Diez de Bastos",
+            "meaning_up": "Carga, responsabilidad y esfuerzo que pesa.",
+            "meaning_rev": "Soltar cargas, delegar o colapso por exceso."
+        },
+        "wapa": {
+            "name": "Sota de Bastos",
+            "meaning_up": "Entusiasmo, curiosidad y ganas de explorar.",
+            "meaning_rev": "Inmadurez, impulsividad o proyectos sin rumbo."
+        },
+        "wakn": {
+            "name": "Caballo de Bastos",
+            "meaning_up": "Pasión, aventura y acción decidida.",
+            "meaning_rev": "Impaciencia, arrogancia o energía sin dirección."
+        },
+        "waqu": {
+            "name": "Reina de Bastos",
+            "meaning_up": "Carisma, confianza y creatividad magnética.",
+            "meaning_rev": "Inseguridad, celos o energía apagada."
+        },
+        "waki": {
+            "name": "Rey de Bastos",
+            "meaning_up": "Liderazgo, visión y voluntad de fuego.",
+            "meaning_rev": "Autoritarismo, impulsividad o liderazgo vacío."
+        },
+        "cuac": {
+            "name": "As de Copas",
+            "meaning_up": "Amor, apertura emocional y plenitud del corazón.",
+            "meaning_rev": "Bloqueo afectivo, vacío o amor que no fluye."
+        },
+        "cu02": {
+            "name": "Dos de Copas",
+            "meaning_up": "Vínculo, reciprocidad y acuerdo del corazón.",
+            "meaning_rev": "Desencuentro, desequilibrio o ruptura de confianza."
+        },
+        "cu03": {
+            "name": "Tres de Copas",
+            "meaning_up": "Amistad, celebración y alegría compartida.",
+            "meaning_rev": "Chismes, exceso social o amistades que se enfrían."
+        },
+        "cu04": {
+            "name": "Cuatro de Copas",
+            "meaning_up": "Apoyo que no ves, apatía o insatisfacción. Mira lo que se te ofrece.",
+            "meaning_rev": "Nueva disposición, oportunidad aceptada o salida de la apatía."
+        },
+        "cu05": {
+            "name": "Cinco de Copas",
+            "meaning_up": "Pérdida, duelo y arrepentimiento. Queda algo en pie.",
+            "meaning_rev": "Aceptación, sanación y regreso de la esperanza."
+        },
+        "cu06": {
+            "name": "Seis de Copas",
+            "meaning_up": "Nostalgia, recuerdos y ternura. El pasado inspira.",
+            "meaning_rev": "Apego al pasado, melancolía o infancia que condiciona."
+        },
+        "cu07": {
+            "name": "Siete de Copas",
+            "meaning_up": "Ilusiones, opciones y fantasía. Distingue el deseo de la realidad.",
+            "meaning_rev": "Claridad, elección concreta o desilusión."
+        },
+        "cu08": {
+            "name": "Ocho de Copas",
+            "meaning_up": "Retirada emocional y búsqueda de algo más profundo.",
+            "meaning_rev": "Miedo a irse, regreso o estancamiento afectivo."
+        },
+        "cu09": {
+            "name": "Nueve de Copas",
+            "meaning_up": "Satisfacción, deseo cumplido y bienestar.",
+            "meaning_rev": "Insatisfacción, exceso o felicidad superficial."
+        },
+        "cu10": {
+            "name": "Diez de Copas",
+            "meaning_up": "Armonía familiar, amor pleno y hogar feliz.",
+            "meaning_rev": "Tensión familiar, ideales rotos o distancia emocional."
+        },
+        "cupa": {
+            "name": "Sota de Copas",
+            "meaning_up": "Sensibilidad, intuición y mensaje del corazón.",
+            "meaning_rev": "Inmadurez emocional, fantasía o sensibilidad herida."
+        },
+        "cukn": {
+            "name": "Caballo de Copas",
+            "meaning_up": "Romance, idealismo y gesto poético.",
+            "meaning_rev": "Ilusión excesiva, promesas vacías o celos."
+        },
+        "cuqu": {
+            "name": "Reina de Copas",
+            "meaning_up": "Empatía, cuidado y sabiduría emocional.",
+            "meaning_rev": "Dependencia, drama o emociones desbordadas."
+        },
+        "cuki": {
+            "name": "Rey de Copas",
+            "meaning_up": "Serenidad, madurez afectiva y contención.",
+            "meaning_rev": "Frialdad, manipulación emocional o evasión."
+        },
+        "peac": {
+            "name": "As de Oros",
+            "meaning_up": "Oportunidad concreta, prosperidad y nuevo comienzo material.",
+            "meaning_rev": "Oportunidad perdida, inestabilidad o falta de recursos."
+        },
+        "pe02": {
+            "name": "Dos de Oros",
+            "meaning_up": "Equilibrio, adaptación y malabares entre prioridades.",
+            "meaning_rev": "Desorden, sobrecarga o decisiones financieras inestables."
+        },
+        "pe03": {
+            "name": "Tres de Oros",
+            "meaning_up": "Trabajo en equipo, oficio y reconocimiento profesional.",
+            "meaning_rev": "Falta de colaboración, trabajo mediocre o esfuerzo no valorado."
+        },
+        "pe04": {
+            "name": "Cuatro de Oros",
+            "meaning_up": "Seguridad, ahorro y control de lo material.",
+            "meaning_rev": "Avaricia, miedo a perder o rigidez."
+        },
+        "pe05": {
+            "name": "Cinco de Oros",
+            "meaning_up": "Escasez, exclusión y dificultad material. Pide ayuda.",
+            "meaning_rev": "Recuperación, apoyo que llega o salida de la crisis."
+        },
+        "pe06": {
+            "name": "Seis de Oros",
+            "meaning_up": "Generosidad, intercambio justo y ayuda.",
+            "meaning_rev": "Dependencia, deudas o ayuda con condiciones."
+        },
+        "pe07": {
+            "name": "Siete de Oros",
+            "meaning_up": "Paciencia, evaluación y cosecha a su tiempo.",
+            "meaning_rev": "Impaciencia, esfuerzo sin fruto o mala inversión."
+        },
+        "pe08": {
+            "name": "Ocho de Oros",
+            "meaning_up": "Aprendizaje, disciplina y trabajo bien hecho.",
+            "meaning_rev": "Perfeccionismo, rutina o falta de dedicación."
+        },
+        "pe09": {
+            "name": "Nueve de Oros",
+            "meaning_up": "Independencia, disfrute y logro personal.",
+            "meaning_rev": "Soledad, apariencia o dependencia material."
+        },
+        "pe10": {
+            "name": "Diez de Oros",
+            "meaning_up": "Legado, estabilidad y prosperidad familiar.",
+            "meaning_rev": "Conflictos de herencia, pérdidas o inestabilidad familiar."
+        },
+        "pepa": {
+            "name": "Sota de Oros",
+            "meaning_up": "Aprendizaje práctico, curiosidad y proyecto concreto.",
+            "meaning_rev": "Pereza, distracción o falta de constancia."
+        },
+        "pekn": {
+            "name": "Caballo de Oros",
+            "meaning_up": "Constancia, responsabilidad y progreso lento pero firme.",
+            "meaning_rev": "Rutina, terquedad o estancamiento."
+        },
+        "pequ": {
+            "name": "Reina de Oros",
+            "meaning_up": "Abundancia, cuidado del hogar y sentido práctico.",
+            "meaning_rev": "Descuido, materialismo o inseguridad."
+        },
+        "peki": {
+            "name": "Rey de Oros",
+            "meaning_up": "Éxito material, solidez y buena gestión.",
+            "meaning_rev": "Codicia, rigidez o éxito sin sentido."
+        },
+        "swac": {
+            "name": "As de Espadas",
+            "meaning_up": "Claridad mental, verdad y decisión afilada.",
+            "meaning_rev": "Confusión, ideas destructivas o verdad a medias."
+        },
+        "sw02": {
+            "name": "Dos de Espadas",
+            "meaning_up": "Indecisión, tregua tensa y elección pendiente.",
+            "meaning_rev": "Decisión tomada, información revelada o evasión."
+        },
+        "sw03": {
+            "name": "Tres de Espadas",
+            "meaning_up": "Dolor, traición y verdad que duele.",
+            "meaning_rev": "Sanación, perdón o dolor que empieza a ceder."
+        },
+        "sw04": {
+            "name": "Cuatro de Espadas",
+            "meaning_up": "Descanso, retiro y recuperación mental.",
+            "meaning_rev": "Despertar, agotamiento o pausa que se alarga."
+        },
+        "sw05": {
+            "name": "Cinco de Espadas",
+            "meaning_up": "Conflicto, derrota y victoria a cualquier precio.",
+            "meaning_rev": "Reconciliación, fin del conflicto o lección aprendida."
+        },
+        "sw06": {
+            "name": "Seis de Espadas",
+            "meaning_up": "Transición, alivio y viaje hacia aguas más calmas.",
+            "meaning_rev": "Estancamiento, regreso al conflicto o transición difícil."
+        },
+        "sw07": {
+            "name": "Siete de Espadas",
+            "meaning_up": "Estrategia, sigilo y riesgo de engaño.",
+            "meaning_rev": "Verdad revelada, arrepentimiento o engaño descubierto."
+        },
+        "sw08": {
+            "name": "Ocho de Espadas",
+            "meaning_up": "Sensación de encierro, miedo y limitaciones mentales.",
+            "meaning_rev": "Liberación, claridad y salida del laberinto."
+        },
+        "sw09": {
+            "name": "Nueve de Espadas",
+            "meaning_up": "Angustia, insomnio y miedos nocturnos.",
+            "meaning_rev": "Alivio, ayuda y miedos que pierden fuerza."
+        },
+        "sw10": {
+            "name": "Diez de Espadas",
+            "meaning_up": "Final doloroso, traición y fondo del pozo. Después, amanecer.",
+            "meaning_rev": "Recuperación, supervivencia y fin del sufrimiento."
+        },
+        "swpa": {
+            "name": "Sota de Espadas",
+            "meaning_up": "Curiosidad, vigilancia y mente inquieta.",
+            "meaning_rev": "Chismes, imprudencia o palabras hirientes."
+        },
+        "swkn": {
+            "name": "Caballo de Espadas",
+            "meaning_up": "Determinación, prisa y ataque directo.",
+            "meaning_rev": "Agresividad, impaciencia o palabras sin filtro."
+        },
+        "swqu": {
+            "name": "Reina de Espadas",
+            "meaning_up": "Claridad, independencia y juicio sereno.",
+            "meaning_rev": "Frialdad, amargura o crítica excesiva."
+        },
+        "swki": {
+            "name": "Rey de Espadas",
+            "meaning_up": "Autoridad intelectual, ética y estrategia.",
+            "meaning_rev": "Manipulación, abuso de poder o frialdad."
+        }
+    }
+}

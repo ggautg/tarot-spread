@@ -24,7 +24,11 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default.
+     * Props compartidas por todas las páginas.
+     *
+     * Además de la sesión y de Ziggy, expone `flash`: los mensajes de éxito o
+     * error que el controlador deja en la sesión se muestran una sola vez en
+     * `FlashMessage.vue`, sin que cada página tenga que leerlos.
      *
      * @return array<string, mixed>
      */
@@ -33,9 +37,14 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-    'user' => $request->user(),
-],
+                'user' => $request->user(),
+            ],
+            'appName' => config('app.name'),
             'appUrl' => config('app.url'),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

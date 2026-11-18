@@ -8,10 +8,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * Cambio de contraseña desde el perfil.
+ *
+ * Es distinto del restablecimiento por correo: aquí se exige la contraseña
+ * actual y la sesión ya está iniciada.
+ */
 class PasswordController extends Controller
 {
     /**
-     * Update the user's password.
+     * Guarda la contraseña nueva después de validar la actual.
      */
     public function update(Request $request): RedirectResponse
     {

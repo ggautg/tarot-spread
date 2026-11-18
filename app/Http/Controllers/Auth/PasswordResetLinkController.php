@@ -10,10 +10,16 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Solicitud del enlace de restablecimiento.
+ *
+ * Por seguridad, el mensaje es el mismo exista o no la cuenta: así no se
+ * puede usar este formulario para averiguar correos registrados.
+ */
 class PasswordResetLinkController extends Controller
 {
     /**
-     * Display the password reset link request view.
+     * Muestra el formulario para pedir el enlace.
      */
     public function create(): Response
     {
@@ -23,7 +29,7 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request.
+     * Envía el enlace de restablecimiento si el correo existe.
      *
      * @throws ValidationException
      */
@@ -33,9 +39,8 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
+        // `sendResetLink` devuelve el estado del envío; el mensaje se muestra
+        // igual esté o no registrado el correo.
         $status = Password::sendResetLink(
             $request->only('email')
         );
